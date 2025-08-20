@@ -105,6 +105,13 @@
       <!-- CONTENEDORES DE VISTAS -->
       <div id="viewDay">
         <h3 style="margin:12px 0 8px">Turnos del día</h3>
+        <!-- Eje X superior -->
+        <div id="axisTop" style="display:grid; grid-template-columns:210px 1fr 80px; gap:10px; margin-bottom:6px">
+          <div></div>
+          <div id="axisTicks" style="display:grid; grid-template-columns: repeat(var(--cols), 1fr); gap:0 0; font-size:11px; color:#94a3b8;">
+          </div>
+          <div></div>
+        </div>
         <div class="gantt">
           <div class="names" id="nameCol"></div>
           <div class="tracks" id="tracks"></div>
@@ -113,25 +120,10 @@
       </div>
 
       <div id="viewWeek" style="display:none">
+        <div id="weekAll" class="week"></div>
         <div id="weekBySuc" class="week"></div>
         <div id="weekByDoc" class="week" style="display:none"></div>
       </div>
-    </section>
-
-    <section class="card">
-      <h3 style="margin-top:0">Detalle por profesional</h3>
-      <table id="tbl">
-        <thead>
-          <tr>
-            <th>Profesional</th>
-            <th>Día</th>
-            <th>Inicio</th>
-            <th>Fin</th>
-            <th>Duración</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
     </section>
   </div>
 
@@ -142,7 +134,7 @@
 
   const $ = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
-  const state = { data:null, dia:'Lunes', sucursal:'Las Condes', mode:'day', weekMode:'sucursal', doctor:'' };
+  const state = { data:null, dia:'Lunes', sucursal:'', mode:'day', weekMode:'sucursal', doctor:'' };
 
   function pad2(n){return String(n).padStart(2,'0')}
   function minutes(hhmm){ const [h,m]=hhmm.split(':').map(Number); return h*60+m; }
@@ -151,8 +143,12 @@
   const dayIdx = d => DIA_ORDEN.indexOf(d);
 
   function loadUIChoices(data){
-    // sucursales
     const suc = Object.keys(data.capacities || { 'Las Condes':4, 'Providencia':6 });
+    $('#selSucursal').innerHTML = `<option value="">— Todas —</option>` + suc.map(s=>`<option>${s}</option>`).join('');
+    $('#selDia').innerHTML = DIA_ORDEN.map(d=>`<option>${d}</option>`).join('');
+    const docs = [...new Set((data.turnos||[]).map(t=>t.profesional))].sort();
+    $('#selDoctor').innerHTML = `<option value="">— Ninguno —</option>` + docs.map(d=>`<option>${d}</option>`).join('');
+  });
     $('#selSucursal').innerHTML = suc.map(s=>`<option>${s}</option>`).join('');
     // días
     $('#selDia').innerHTML = DIA_ORDEN.map(d=>`<option>${d}</option>`).join('');
@@ -173,28 +169,25 @@
 
   function renderDay(){
     const { capacities, generated_at, turnos } = state.data;
-    const cap = capacities[state.sucursal] || 0;
-    $('#capInfo').textContent = `Capacidad ${state.sucursal}: ${cap}`;
+    const suc = state.sucursal || Object.keys(capacities)[0];
+    const cap = capacities[suc] || 0;
+    $('#capInfo').textContent = `Capacidad ${suc}: ${cap}`;
     $('#genAt').textContent = generated_at ? `Última publicación: ${new Date(generated_at).toLocaleString()}` : '';
 
-    const list = turnos.filter(t=> t.sucursal===state.sucursal && t.dia===state.dia)
+    const list = turnos.filter(t=> (state.sucursal? t.sucursal===state.sucursal : true) && t.dia===state.dia)
                        .sort((a,b)=> a.profesional.localeCompare(b.profesional));
 
-    // Tabla detalle
-    const tbody = $('#tbl tbody');
-    tbody.innerHTML = list.map(t=>{
-      const dur = calcEffective(t);
-      return `<tr><td>${t.profesional}</td><td>${t.dia}</td><td>${t.hora_inicio}</td><td>${t.hora_fin}</td><td><span class=\"pill\">${fmtDur(dur)}</span></td></tr>`;
-    }).join('');
+    const tbody = $('#tbl tbody'); if(tbody) tbody.innerHTML = '';
 
-    // Pico de concurrencia
     const slotList = slots();
+    $('#axisTicks').style.setProperty('--cols', slotList.length);
+    $('#axisTicks').innerHTML = slotList.map((s,i)=> i%4===0? `<div style='text-align:center'>${s}</div>`: `<div></div>`).join('');
+
     const map = new Map(slotList.map(s=>[s,0]));
     list.forEach(t=>{ const s=minutes(t.hora_inicio), e=minutes(t.hora_fin); slotList.forEach(x=>{const mm=minutes(x); if(mm>=s && mm<e) map.set(x,(map.get(x)||0)+1);}); });
-    const peak = Math.max(...Array.from(map.values()));
+    const peak = Math.max(0,...Array.from(map.values()));
     $('#peakInfo').textContent = `Pico: ${peak}/${cap}`;
 
-    // Gantt por profesional
     const names = list.map(x=>x.profesional);
     $('#nameCol').innerHTML = names.map(n=>`<div class="muted">${n}</div>`).join('');
     $('#durCol').innerHTML = list.map(t=>`<div class="dur">${fmtDur(calcEffective(t))}</div>`).join('');
@@ -214,37 +207,74 @@
     }).join('');
     $('#tracks').innerHTML = tracksHtml || '<div class="muted">Sin turnos para esta combinación.</div>';
   }
+      </div>`;
+    }).join('');
+    $('#tracks').innerHTML = tracksHtml || '<div class="muted">Sin turnos para esta combinación.</div>';
+  }
 
   function renderWeekBySucursal(){
-    const cap = state.data.capacities[state.sucursal] || 0;
-    const byDoc = {};
-    (state.data.turnos||[]).filter(t=>t.sucursal===state.sucursal).forEach(t=>{ (byDoc[t.profesional]=byDoc[t.profesional]||[]).push(t); });
-    const docs = Object.keys(byDoc).sort();
-    const th = `<tr><th>Profesional</th>${DIA_ORDEN.map(d=>`<th>${d}</th>`).join('')}<th>Total</th></tr>`;
-    const rows = docs.map(name=>{
-      let total=0;
-      const tds = DIA_ORDEN.map(d=>{
-        const xs = (byDoc[name]||[]).filter(t=>t.dia===d).sort((a,b)=>minutes(a.hora_inicio)-minutes(b.hora_inicio));
-        const segs = xs.map(t=>{
-          const left = ((minutes(t.hora_inicio)-START_H*60)/((END_H-START_H)*60))*100;
-          const width = ((minutes(t.hora_fin)-minutes(t.hora_inicio))/((END_H-START_H)*60))*100;
-          const rest = t.descanso && t.descanso.inicio && t.descanso.fin;
-          const rl = rest? ((minutes(t.descanso.inicio)-START_H*60)/((END_H-START_H)*60))*100:0;
-          const rw = rest? ((minutes(t.descanso.fin)-minutes(t.descanso.inicio))/((END_H-START_H)*60))*100:0;
-          total += calcEffective(t);
-          return `<div class="wb"><div class="segm" style="left:${left}%; width:${width}%"></div>${rest?`<div class="segm rest" style="left:${rl}%; width:${rw}%"></div>`:''}</div>`;
+    const caps = state.data.capacities || {};
+    const renderTable = (sucursalLabel, sucFilter) => {
+      const byDoc = {};
+      (state.data.turnos||[]).filter(t=> sucFilter? t.sucursal===sucFilter : true).forEach(t=>{ (byDoc[t.profesional]=byDoc[t.profesional]||[]).push(t); });
+      const docs = Object.keys(byDoc).sort();
+      const th = `<tr><th>Profesional</th>${DIA_ORDEN.map(d=>`<th>${d}</th>`).join('')}<th>Total</th></tr>`;
+      const rows = docs.map(name=>{
+        let total=0;
+        const tds = DIA_ORDEN.map(d=>{
+          const xs = (byDoc[name]||[]).filter(t=>t.dia===d).sort((a,b)=>minutes(a.hora_inicio)-minutes(b.hora_inicio));
+          const segs = xs.map(t=>{
+            const left = ((minutes(t.hora_inicio)-START_H*60)/((END_H-START_H)*60))*100;
+            const width = ((minutes(t.hora_fin)-minutes(t.hora_inicio))/((END_H-START_H)*60))*100;
+            const rest = t.descanso && t.descanso.inicio && t.descanso.fin;
+            const rl = rest? ((minutes(t.descanso.inicio)-START_H*60)/((END_H-START_H)*60))*100:0;
+            const rw = rest? ((minutes(t.descanso.fin)-minutes(t.descanso.inicio))/((END_H-START_H)*60))*100:0;
+            total += calcEffective(t);
+            const tag = sucFilter ? '' : `<span class='tag' style='margin-left:6px'>${t.sucursal}</span>`;
+            return `<div class="wb" title="${t.hora_inicio}–${t.hora_fin}">${tag}<div class="segm" style="left:${left}%; width:${width}%"></div>${rest?`<div class="segm rest" style="left:${rl}%; width:${rw}%"></div>`:''}</div>`;
+          }).join('');
+          return `<td>${segs||''}</td>`;
         }).join('');
-        return `<td>${segs||''}</td>`;
+        return `<tr><td>${name}</td>${tds}<td><span class="pill">${fmtDur(total)}</span></td></tr>`;
       }).join('');
-      return `<tr><td>${name}</td>${tds}<td><span class="pill">${fmtDur(total)}</span></td></tr>`;
-    }).join('');
-    $('#weekBySuc').innerHTML = `<h3 style="margin:8px 0">Semana · ${state.sucursal} (capacidad ${cap})</h3><table>${th}${rows}</table>`;
+      return `<h3 style="margin:8px 0">Semana ${sucursalLabel? '· '+sucursalLabel : ''}</h3><table>${th}${rows}</table>`;
+    };
+
+    const suc = state.sucursal; // '' = todas
+    if(!suc){
+      $('#weekAll').innerHTML = renderTable('', null);
+      $('#weekBySuc').innerHTML = '';
+    } else {
+      $('#weekAll').innerHTML = '';
+      $('#weekBySuc').innerHTML = renderTable(suc, suc);
+    }
     $('#weekByDoc').style.display='none';
+    $('#weekAll').style.display='block';
     $('#weekBySuc').style.display='block';
   }
 
   function renderWeekByDoctor(){
-    if(!state.doctor){ $('#weekByDoc').innerHTML = '<div class="muted">Selecciona un doctor.</div>'; return; }
+    if(!state.doctor){ $('#weekByDoc').innerHTML = '<div class="muted">Selecciona un doctor o deja vacío para ver todos por sucursal.</div>'; return; }
+    const items = (state.data.turnos||[]).filter(t=>t.profesional===state.doctor);
+    let total=0;
+    const head = `<div></div>${DIA_ORDEN.map(d=>`<div class="muted" style="text-align:center">${d}</div>`).join('')}<div style="text-align:right" class="muted">Total</div>`;
+    const cells = DIA_ORDEN.map(d=>{
+      const perDay = items.filter(x=>x.dia===d);
+      const cell = `<div class="daycell">${perDay.map(t=>{
+        const left = ((minutes(t.hora_inicio)-START_H*60)/((END_H-START_H)*60))*100;
+        const width = ((minutes(t.hora_fin)-minutes(t.hora_inicio))/((END_H-START_H)*60))*100;
+        total += calcEffective(t);
+        const cls = (t.sucursal==='Providencia')? 'prov':'lc';
+        return `<div class="mini ${cls}" style="left:${left}%; width:${width}%" title="${t.sucursal}: ${t.hora_inicio}–${t.hora_fin}"></div>`;
+      }).join('')}</div>`;
+      return cell;
+    }).join('');
+    const row = `<div class="muted">${state.doctor}</div>${cells}<div style="text-align:right"><span class="pill">${fmtDur(total)}</span></div>`;
+    $('#weekByDoc').innerHTML = `<h3 style="margin:8px 0">Semana · ${state.doctor} <span class="tag" style="margin-left:6px">Prov=<span style="color:var(--prov)">■</span> LC=<span style="color:var(--lc)">■</span></span></h3><div class="weekdoc">${head}${row}</div>`;
+    $('#weekBySuc').style.display='none';
+    $('#weekAll').style.display='none';
+    $('#weekByDoc').style.display='block';
+  }
     const items = (state.data.turnos||[]).filter(t=>t.profesional===state.doctor);
     const capProv = state.data.capacities['Providencia']||0;
     const capLC = state.data.capacities['Las Condes']||0;
@@ -269,11 +299,25 @@
 
   function render(){
     if(!state.data) return;
+    // Estado de controles según modo
     if(state.mode==='day'){
+      $('#selDia').disabled = false;
+      $('#selDoctor').disabled = true;
+      $('#selSucursal').disabled = false;
       $('#viewDay').style.display='block';
       $('#viewWeek').style.display='none';
       renderDay();
     } else {
+      $('#selDia').disabled = true;
+      // Si hay doctor seleccionado, inhabilita sucursal
+      const hasDoc = !!state.doctor;
+      $('#selDoctor').disabled = false;
+      $('#selSucursal').disabled = hasDoc;
+      $('#viewDay').style.display='none';
+      $('#viewWeek').style.display='block';
+      if(hasDoc) { renderWeekByDoctor(); } else { renderWeekBySucursal(); }
+    }
+  } else {
       $('#viewDay').style.display='none';
       $('#viewWeek').style.display='block';
       if(state.weekMode==='sucursal') renderWeekBySucursal(); else renderWeekByDoctor();
@@ -294,16 +338,12 @@
   }
 
   // Eventos UI
-  $('#modeDay').addEventListener('click',()=>{ state.mode='day'; $('#modeDay').classList.add('active'); $('#modeWeek').classList.remove('active'); render(); });
+  $('#modeDay').addEventListener('click',()=>{ state.mode='day'; state.doctor=''; $('#modeDay').classList.add('active'); $('#modeWeek').classList.remove('active'); render(); });
   $('#modeWeek').addEventListener('click',()=>{ state.mode='week'; $('#modeWeek').classList.add('active'); $('#modeDay').classList.remove('active'); render(); });
   $('#selDia').addEventListener('change',()=>{ state.dia = $('#selDia').value; render(); });
-  $('#selSucursal').addEventListener('change',()=>{ state.sucursal = $('#selSucursal').value; if(state.mode==='week' && state.weekMode==='sucursal') render(); else render(); });
-  $('#selDoctor').addEventListener('change',()=>{ state.doctor = $('#selDoctor').value; state.weekMode='doctor'; render(); });
+  $('#selSucursal').addEventListener('change',()=>{ state.sucursal = $('#selSucursal').value; if(state.mode==='week' && !state.doctor) render(); else render(); });
+  $('#selDoctor').addEventListener('change',()=>{ state.doctor = $('#selDoctor').value; render(); });
 
-  // Cambiar a modo sucursal cuando se cambia sucursal si no hay doctor seleccionado
-  $('#selSucursal').addEventListener('click',()=>{ if(state.mode==='week' && !state.doctor){ state.weekMode='sucursal'; }});
-
-  // Apply y reload
   $('#apply')?.addEventListener('click',()=>{ const url=$('#endpoint').value.trim(); if(url){ localStorage.setItem('avaria_endpoint', url); fetchData(url);} render(); });
   $('#reload').addEventListener('click',()=>{ const url = $('#endpoint').value.trim(); if(url) fetchData(url); });
 
