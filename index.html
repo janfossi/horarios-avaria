@@ -12,42 +12,38 @@
     body{margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; background:var(--bg); color:var(--text)}
     header{display:flex; gap:12px; align-items:center; padding:20px 24px; border-bottom:1px solid #1f2937}
     header h1{font-size:18px; font-weight:700; margin:0}
-    .container{max-width:1100px; margin:0 auto; padding:24px}
+    .container{max-width:1200px; margin:0 auto; padding:24px}
     .card{background:var(--card); border:1px solid #1f2937; border-radius:16px; padding:18px; box-shadow:0 8px 24px rgba(0,0,0,.25)}
     .grid{display:grid; gap:16px}
-    @media (min-width: 980px){ .grid{grid-template-columns: 1.1fr .9fr} }
+    @media (min-width: 1100px){ .grid{grid-template-columns: 1.2fr .8fr} }
     label{font-size:12px; color:var(--muted)}
     select,input[type="text"]{width:100%; padding:10px 12px; border-radius:12px; border:1px solid #263244; background:#0e141d; color:var(--text)}
-    .row{display:grid; grid-template-columns: repeat(4, 1fr); gap:10px}
     .controls{display:grid; grid-template-columns: 1.2fr .8fr 1fr 1fr; gap:12px; margin:8px 0 4px}
     .muted{color:var(--muted)}
     .tag{display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; background:#0d141c; border:1px solid #253145; font-size:12px}
     .flex{display:flex; gap:10px; align-items:center}
     .right{margin-left:auto}
     .btn{padding:10px 14px; border-radius:12px; border:1px solid #283349; background:#0f1620; color:var(--text); cursor:pointer}
-    .btn:hover{filter:brightness(1.1)}
+    .btn:hover{filter:brightness(1.08)}
 
-    /* timeline */
-    .timeline{display:grid; grid-template-columns: 80px 1fr; gap:8px}
-    .scale{display:grid; grid-template-rows: repeat(var(--rows), 24px); gap:4px}
-    .scale div{font-size:11px; color:var(--muted); text-align:right; padding-right:6px}
-    .bars{position:relative; border:1px solid #263244; border-radius:12px; padding:10px; background:#0c121b;}
-    .bar{position:relative; height:22px; border-radius:8px; margin:4px 0; display:flex; align-items:center; padding:0 8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-    .bar .badge{font-size:11px; opacity:.9}
+    /* ==== Concurrency chart ==== */
+    .chart{display:grid; grid-template-columns: 90px 1fr; gap:10px; margin-top:8px}
+    .chart .ylabel{font-size:12px; color:var(--muted); text-align:right; padding-top:70px}
+    .cols{display:grid; grid-template-columns: repeat(var(--cols), 1fr); gap:3px; align-items:end; height:120px; border:1px solid #263244; border-radius:12px; padding:8px; background:#0c121b}
+    .col{height:6px; border-radius:4px; border:1px solid #263244}
+    .col.ok{background:#114038}
+    .col.mid{background:#0f3632}
+    .col.low{background:#0c1f26}
+    .col.over{background:#4e1b1b; outline:2px solid var(--danger)}
 
-    /* occupancy heat */
-    .heat{display:grid; grid-template-columns: 80px 1fr; gap:8px; margin-top:16px}
-    .heat .cells{display:grid; grid-template-columns: repeat(var(--cols), 1fr); gap:2px; align-items:center}
-    .cell{height:26px; border-radius:6px; border:1px solid #263244; display:flex; align-items:center; justify-content:center; font-size:11px}
-    .c0{background:#0c141e}
-    .c1{background:#0c1f26}
-    .c2{background:#0e2a2c}
-    .c3{background:#0f3632}
-    .c4{background:#114038}
-    .c5{background:#3a1a1a}
-    .c6{background:#551b1b}
-    .over{outline:2px solid var(--danger)}
+    /* ==== Gantt ==== */
+    .gantt{display:grid; grid-template-columns: 170px 1fr; gap:8px; margin-top:18px}
+    .names{display:flex; flex-direction:column; gap:8px; font-size:13px}
+    .tracks{display:flex; flex-direction:column; gap:8px}
+    .track{position:relative; width:100%; height:28px; border-radius:12px; border:1px solid #263244; background:#0c121b; overflow:hidden}
+    .slotbar{position:absolute; top:4px; bottom:4px; border-radius:8px; display:flex; align-items:center; padding:0 8px; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:linear-gradient(180deg, #113148, #122033)}
 
+    /* table */
     table{width:100%; border-collapse:collapse; font-size:14px}
     th,td{padding:10px 8px; border-bottom:1px solid #1f2937}
     th{color:var(--muted); text-align:left; font-weight:600}
@@ -85,20 +81,23 @@
         </div>
       </div>
 
-      <div class="flex" style="margin:6px 0 14px">
+      <div class="flex" style="margin:6px 0 4px">
         <span id="capInfo" class="tag">Capacidad: –</span>
+        <span id="peaks" class="tag">Pico: –</span>
         <span id="genAt" class="muted"></span>
       </div>
 
-      <div class="heat">
-        <div class="scale" id="heatScale"></div>
-        <div class="cells" id="heatCells"></div>
+      <!-- Concurrency chart -->
+      <div class="chart">
+        <div class="ylabel">Concurrencia</div>
+        <div class="cols" id="occCols"></div>
       </div>
 
+      <!-- Gantt by professional -->
       <h3 style="margin:18px 0 8px">Turnos del día</h3>
-      <div class="timeline">
-        <div class="scale" id="timeScale"></div>
-        <div id="bars" class="bars"></div>
+      <div class="gantt">
+        <div class="names" id="nameCol"></div>
+        <div class="tracks" id="tracks"></div>
       </div>
     </section>
 
@@ -120,7 +119,7 @@
   </div>
 
 <script>
-  // ==== CONFIG INICIAL (puedes dejar tu URL aquí para auto-cargar) ====
+  // ==== CONFIG INICIAL ====
   const DEFAULT_ENDPOINT = "https://script.google.com/macros/s/AKfycby1wmrAeXSYE7uXhkJY345RJo1EXfouFYqhK-3mcq5v9uWoLYVksQdicLX71SeL7J7JgA/exec";
   const DIA_ORDEN = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
   const START_H = 8;  // hora de inicio de la grilla
@@ -135,30 +134,11 @@
   function pad2(n){return String(n).padStart(2,'0')}
   function minutes(hhmm){ const [h,m]=hhmm.split(':').map(Number); return h*60+m; }
   function fmtDur(min){ const h=Math.floor(min/60), m=min%60; return `${h}h ${pad2(m)}m`; }
-
-  function buildTimeLabels(){
-    const rows = ((END_H-START_H)*60)/STEP_MIN;
-    $('#timeScale').style.setProperty('--rows', rows);
-    $('#heatScale').style.setProperty('--rows', 1);
-    const scale = [];
-    for(let h=START_H; h<END_H; h++){
-      scale.push(`<div>${pad2(h)}:00</div>`);
-      if(STEP_MIN===15){ scale.push('<div></div>'); scale.push('<div></div>'); scale.push('<div></div>'); }
-    }
-    $('#timeScale').innerHTML = scale.join('');
-    // Heat scale (una sola fila con etiqueta izquierda)
-    $('#heatScale').innerHTML = `<div class="muted">Concurrencia</div>`;
-  }
-
-  function slots(){
-    const arr=[]; for(let h=START_H; h<END_H; h++) for(let m=0; m<60; m+=STEP_MIN) arr.push(`${pad2(h)}:${pad2(m)}`); return arr;
-  }
+  function slots(){ const arr=[]; for(let h=START_H; h<END_H; h++) for(let m=0; m<60; m+=STEP_MIN) arr.push(`${pad2(h)}:${pad2(m)}`); return arr; }
 
   function loadUIChoices(data){
-    // sucursales
     const suc = Object.keys(data.capacities || { 'Las Condes':4, 'Providencia':6 });
     $('#selSucursal').innerHTML = suc.map(s=>`<option>${s}</option>`).join('');
-    // días
     $('#selDia').innerHTML = DIA_ORDEN.map(d=>`<option>${d}</option>`).join('');
   }
 
@@ -169,60 +149,63 @@
     $('#genAt').textContent = generated_at ? `Última publicación: ${new Date(generated_at).toLocaleString()}` : '';
 
     const dayTurns = turnos.filter(t=> t.sucursal===state.sucursal && t.dia===state.dia);
-    // Tabla detalle
+
+    // ==== Tabla detalle ====
     const tbody = $('#tbl tbody');
     tbody.innerHTML = dayTurns.map(t=>{
       const dur = minutes(t.hora_fin) - minutes(t.hora_inicio);
       return `<tr><td>${t.profesional}</td><td>${t.dia}</td><td>${t.hora_inicio}</td><td>${t.hora_fin}</td><td><span class="pill">${fmtDur(dur)}</span></td></tr>`;
     }).join('');
 
-    // Barras por profesional (timeline simple)
-    const container = $('#bars'); container.innerHTML='';
-    const base = START_H*60;
-    dayTurns.forEach(t=>{
-      const left = ((minutes(t.hora_inicio)-base) / ((END_H-START_H)*60)) * 100;
-      const width = ((minutes(t.hora_fin)-minutes(t.hora_inicio)) / ((END_H-START_H)*60)) * 100;
-      const el = document.createElement('div');
-      el.className = 'bar';
-      el.style.background = 'linear-gradient(180deg, #113148, #122033)';
-      el.style.width = width + '%';
-      el.style.marginLeft = left + '%';
-      el.innerHTML = `<span class="badge">${t.profesional} · ${t.hora_inicio}–${t.hora_fin}</span>`;
-      container.appendChild(el);
-    });
-
-    // Heat de concurrencia por bloque
+    // ==== Concurrency chart ====
     const cols = ((END_H-START_H)*60)/STEP_MIN;
-    $('#heatCells').style.setProperty('--cols', cols);
+    $('#occCols').style.setProperty('--cols', cols);
     const cap = capacities[state.sucursal] || 0;
-    const map = new Map();
     const slotList = slots();
-    slotList.forEach(s=>map.set(s,0));
+    const map = new Map(slotList.map(s=>[s,0]));
     dayTurns.forEach(t=>{
       const start = minutes(t.hora_inicio); const end = minutes(t.hora_fin);
       slotList.forEach(s=>{ const mm=minutes(s); if(mm>=start && mm<end){ map.set(s, (map.get(s)||0)+1 ); } });
     });
-    const cells = slotList.map(s=>{
-      const v = map.get(s)||0;
-      const over = v>cap ? ' over' : '';
-      const cls = 'c'+Math.min(v,6);
-      return `<div class="cell ${cls}${over}" title="${s} · ${v}/${cap}">${v}</div>`;
+    let peak = 0, overBlocks = 0;
+    const bars = slotList.map(s=>{
+      const v = map.get(s)||0; peak = Math.max(peak, v); if(v>cap) overBlocks++;
+      const ratio = cap? Math.min(v/cap,1): 0; // altura relativa
+      let cls = 'low'; if(ratio>0.66) cls='ok'; else if(ratio>0.33) cls='mid';
+      if(v>cap) cls='over';
+      return `<div class="col ${cls}" style="height:${Math.max(6, Math.round(ratio*100))}px" title="${s} · ${v}/${cap}"></div>`;
     }).join('');
-    $('#heatCells').innerHTML = cells;
+    $('#occCols').innerHTML = bars;
+    $('#peaks').textContent = `Pico: ${peak}/${cap} · Bloques sobre capacidad: ${overBlocks}`;
+
+    // ==== Gantt por profesional ====
+    const byProf = {};
+    dayTurns.forEach(t=>{ (byProf[t.profesional]=byProf[t.profesional]||[]).push(t); });
+    const names = Object.keys(byProf).sort();
+    $('#nameCol').innerHTML = names.map(n=>`<div class="muted">${n}</div>`).join('');
+    const base = START_H*60, total = (END_H-START_H)*60;
+    const tracksHtml = names.map(n=>{
+      const items = byProf[n].sort((a,b)=> minutes(a.hora_inicio)-minutes(b.hora_inicio)).map(t=>{
+        const left = ((minutes(t.hora_inicio)-base)/total)*100;
+        const width = ((minutes(t.hora_fin)-minutes(t.hora_inicio))/total)*100;
+        return `<div class="slotbar" style="left:${left}%; width:${width}%;">${t.hora_inicio}–${t.hora_fin}</div>`;
+      }).join('');
+      return `<div class="track">${items}</div>`;
+    }).join('');
+    $('#tracks').innerHTML = tracksHtml || '<div class="muted">Sin turnos para esta combinación.</div>';
   }
 
   async function fetchData(url){
-    $('#status').textContent = 'Cargando…';
-    const res = await fetch(url);
-    const data = await res.json();
-    if(data.status==='error'){
-      $('#status').textContent = `JSON con estado=error (${data.error_count})`;
-    } else {
-      $('#status').textContent = 'OK';
-    }
-    state.data = data;
-    loadUIChoices(data);
-    render();
+    try{
+      $('#status').textContent = 'Cargando…';
+      const res = await fetch(url, { cache: 'no-store' });
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      state.data = data;
+      $('#status').textContent = (data.status==='error')? `JSON con estado=error (${data.error_count})` : 'OK';
+      loadUIChoices(data);
+      render();
+    }catch(err){ $('#status').textContent = 'Error al cargar: ' + err.message; console.error(err); }
   }
 
   // Eventos
@@ -233,17 +216,14 @@
     if(url) localStorage.setItem('avaria_endpoint', url);
     if(url) fetchData(url); else render();
   });
-  $('#reload').addEventListener('click',()=>{
-    const url = $('#endpoint').value.trim(); if(url) fetchData(url);
-  });
+  $('#reload').addEventListener('click',()=>{ const url = $('#endpoint').value.trim(); if(url) fetchData(url); });
   $('#selDia').addEventListener('change',()=>{ state.dia = $('#selDia').value; render(); });
   $('#selSucursal').addEventListener('change',()=>{ state.sucursal = $('#selSucursal').value; render(); });
 
   // Boot
-  buildTimeLabels();
   const saved = localStorage.getItem('avaria_endpoint') || DEFAULT_ENDPOINT;
-  if(saved){ $('#endpoint').value = saved; fetchData(saved); }
-  else { $('#endpoint').value = DEFAULT_ENDPOINT; }
+  $('#endpoint').value = saved; 
+  fetchData(saved);
 </script>
 </body>
 </html>
