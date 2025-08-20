@@ -7,47 +7,55 @@
   <style>
     :root{
       --bg:#0b0f14; --card:#121821; --muted:#7f8ea3; --text:#e6edf7; --accent:#2dd4bf; --danger:#ef4444; --ok:#22c55e;
+      --prov:#0ea5e9; --lc:#22c55e; /* colores sucursales */
     }
     *{box-sizing:border-box}
     body{margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; background:var(--bg); color:var(--text)}
     header{display:flex; gap:12px; align-items:center; padding:20px 24px; border-bottom:1px solid #1f2937}
     header h1{font-size:18px; font-weight:700; margin:0}
-    .container{max-width:1200px; margin:0 auto; padding:24px}
+    .container{max-width:1400px; margin:0 auto; padding:24px}
     .card{background:var(--card); border:1px solid #1f2937; border-radius:16px; padding:18px; box-shadow:0 8px 24px rgba(0,0,0,.25)}
     .grid{display:grid; gap:16px}
-    @media (min-width: 1100px){ .grid{grid-template-columns: 1.2fr .8fr} }
+    @media (min-width: 1240px){ .grid{grid-template-columns: 1.2fr .8fr} }
     label{font-size:12px; color:var(--muted)}
     select,input[type="text"]{width:100%; padding:10px 12px; border-radius:12px; border:1px solid #263244; background:#0e141d; color:var(--text)}
-    .controls{display:grid; grid-template-columns: 1.2fr .8fr 1fr 1fr; gap:12px; margin:8px 0 4px}
+    .controls{display:grid; grid-template-columns: 1.2fr .8fr 1fr 1fr 1fr; gap:12px; margin:8px 0 4px}
     .muted{color:var(--muted)}
     .tag{display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; background:#0d141c; border:1px solid #253145; font-size:12px}
     .flex{display:flex; gap:10px; align-items:center}
     .right{margin-left:auto}
     .btn{padding:10px 14px; border-radius:12px; border:1px solid #283349; background:#0f1620; color:var(--text); cursor:pointer}
     .btn:hover{filter:brightness(1.08)}
+    .seg{display:inline-flex; border:1px solid #283349; border-radius:12px; overflow:hidden}
+    .seg button{padding:8px 12px; background:#0f1620; color:var(--text); border:0; cursor:pointer}
+    .seg button.active{background:#172233}
 
-    /* ==== Concurrency chart ==== */
-    .chart{display:grid; grid-template-columns: 90px 1fr; gap:10px; margin-top:8px}
-    .chart .ylabel{font-size:12px; color:var(--muted); text-align:right; padding-top:70px}
-    .cols{display:grid; grid-template-columns: repeat(var(--cols), 1fr); gap:3px; align-items:end; height:120px; border:1px solid #263244; border-radius:12px; padding:8px; background:#0c121b}
-    .col{height:6px; border-radius:4px; border:1px solid #263244}
-    .col.ok{background:#114038}
-    .col.mid{background:#0f3632}
-    .col.low{background:#0c1f26}
-    .col.over{background:#4e1b1b; outline:2px solid var(--danger)}
+    /* ==== Concurrency (compact summary only) ==== */
+    .chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px}
 
-    /* ==== Gantt ==== */
-    .gantt{display:grid; grid-template-columns: 170px 1fr; gap:8px; margin-top:18px}
-    .names{display:flex; flex-direction:column; gap:8px; font-size:13px}
-    .tracks{display:flex; flex-direction:column; gap:8px}
-    .track{position:relative; width:100%; height:28px; border-radius:12px; border:1px solid #263244; background:#0c121b; overflow:hidden}
-    .slotbar{position:absolute; top:4px; bottom:4px; border-radius:8px; display:flex; align-items:center; padding:0 8px; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:linear-gradient(180deg, #113148, #122033)}
+    /* ==== Gantt Día ==== */
+    .gantt{display:grid; grid-template-columns: 210px 1fr 80px; gap:10px; margin-top:12px}
+    .names{display:flex; flex-direction:column; gap:10px; font-size:13px}
+    .tracks{display:flex; flex-direction:column; gap:10px}
+    .track{position:relative; width:100%; height:32px; border-radius:12px; border:1px solid #263244; background:#0c121b; overflow:hidden}
+    .bar{position:absolute; top:5px; bottom:5px; border-radius:8px; background:linear-gradient(180deg, #113148, #122033); box-shadow:0 2px 6px rgba(0,0,0,.3); color:#cde5ff; display:flex; align-items:center; padding:0 10px; gap:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .rest{position:absolute; top:7px; bottom:7px; border-radius:6px; background:rgba(239,68,68,.25); border:1px dashed rgba(239,68,68,.6)}
+    .dur{display:flex; align-items:center; justify-content:flex-end; font-size:12px; color:#cbd5e1}
 
-    /* table */
-    table{width:100%; border-collapse:collapse; font-size:14px}
-    th,td{padding:10px 8px; border-bottom:1px solid #1f2937}
-    th{color:var(--muted); text-align:left; font-weight:600}
-    .pill{padding:4px 8px; border-radius:999px; border:1px solid #283349; background:#0f1620; font-size:12px}
+    /* ==== Semana por sucursal ==== */
+    .week{margin-top:12px}
+    .week table{width:100%; border-collapse:collapse; font-size:13px}
+    .week th,.week td{padding:10px 8px; border-bottom:1px solid #1f2937; vertical-align:middle}
+    .wb{position:relative; height:16px; border-radius:6px; background:#0c121b; border:1px solid #263244}
+    .wb .segm{position:absolute; top:2px; bottom:2px; border-radius:5px; background:linear-gradient(180deg,#0b3a4d,#0b2a3d)}
+    .wb .segm.rest{background:rgba(239,68,68,.25); border:1px dashed rgba(239,68,68,.6)}
+
+    /* ==== Semana por doctor (opción A) ==== */
+    .weekdoc{display:grid; grid-template-columns: 120px repeat(7, 1fr) 120px; gap:8px; align-items:center}
+    .daycell{height:20px; border-radius:6px; background:#0c121b; border:1px solid #263244; position:relative}
+    .mini{position:absolute; top:2px; bottom:2px; border-radius:5px}
+    .prov{background:var(--prov)}
+    .lc{background:var(--lc)}
   </style>
 </head>
 <body>
@@ -65,7 +73,14 @@
       <div class="controls">
         <div>
           <label>Endpoint JSON</label>
-          <input id="endpoint" type="text" placeholder="Pega aquí la URL de tu Web App (doGet)" />
+          <input id="endpoint" type="text" placeholder="URL Web App (doGet)" />
+        </div>
+        <div>
+          <label>Vista</label>
+          <div class="seg">
+            <button id="modeDay" class="active">Día</button>
+            <button id="modeWeek">Semana</button>
+          </div>
         </div>
         <div>
           <label>Día</label>
@@ -76,28 +91,30 @@
           <select id="selSucursal"></select>
         </div>
         <div>
-          <label>&nbsp;</label>
-          <button id="apply" class="btn">Aplicar</button>
+          <label>Doctor (solo vista semana)</label>
+          <select id="selDoctor"></select>
         </div>
       </div>
 
-      <div class="flex" style="margin:6px 0 4px">
+      <div class="flex chips">
         <span id="capInfo" class="tag">Capacidad: –</span>
-        <span id="peaks" class="tag">Pico: –</span>
+        <span id="peakInfo" class="tag">Pico: –</span>
         <span id="genAt" class="muted"></span>
       </div>
 
-      <!-- Concurrency chart -->
-      <div class="chart">
-        <div class="ylabel">Concurrencia</div>
-        <div class="cols" id="occCols"></div>
+      <!-- CONTENEDORES DE VISTAS -->
+      <div id="viewDay">
+        <h3 style="margin:12px 0 8px">Turnos del día</h3>
+        <div class="gantt">
+          <div class="names" id="nameCol"></div>
+          <div class="tracks" id="tracks"></div>
+          <div class="names" id="durCol"></div>
+        </div>
       </div>
 
-      <!-- Gantt by professional -->
-      <h3 style="margin:18px 0 8px">Turnos del día</h3>
-      <div class="gantt">
-        <div class="names" id="nameCol"></div>
-        <div class="tracks" id="tracks"></div>
+      <div id="viewWeek" style="display:none">
+        <div id="weekBySuc" class="week"></div>
+        <div id="weekByDoc" class="week" style="display:none"></div>
       </div>
     </section>
 
@@ -119,80 +136,148 @@
   </div>
 
 <script>
-  // ==== CONFIG INICIAL ====
   const DEFAULT_ENDPOINT = "https://script.google.com/macros/s/AKfycby1wmrAeXSYE7uXhkJY345RJo1EXfouFYqhK-3mcq5v9uWoLYVksQdicLX71SeL7J7JgA/exec";
   const DIA_ORDEN = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
-  const START_H = 8;  // hora de inicio de la grilla
-  const END_H   = 21; // hora de término de la grilla
-  const STEP_MIN = 15;
+  const START_H = 8, END_H = 21, STEP_MIN = 15;
 
   const $ = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
-
-  const state = { data:null, dia:'Lunes', sucursal:'Las Condes' };
+  const state = { data:null, dia:'Lunes', sucursal:'Las Condes', mode:'day', weekMode:'sucursal', doctor:'' };
 
   function pad2(n){return String(n).padStart(2,'0')}
   function minutes(hhmm){ const [h,m]=hhmm.split(':').map(Number); return h*60+m; }
   function fmtDur(min){ const h=Math.floor(min/60), m=min%60; return `${h}h ${pad2(m)}m`; }
   function slots(){ const arr=[]; for(let h=START_H; h<END_H; h++) for(let m=0; m<60; m+=STEP_MIN) arr.push(`${pad2(h)}:${pad2(m)}`); return arr; }
+  const dayIdx = d => DIA_ORDEN.indexOf(d);
 
   function loadUIChoices(data){
+    // sucursales
     const suc = Object.keys(data.capacities || { 'Las Condes':4, 'Providencia':6 });
     $('#selSucursal').innerHTML = suc.map(s=>`<option>${s}</option>`).join('');
+    // días
     $('#selDia').innerHTML = DIA_ORDEN.map(d=>`<option>${d}</option>`).join('');
+    // doctores
+    const docs = [...new Set((data.turnos||[]).map(t=>t.profesional))].sort();
+    $('#selDoctor').innerHTML = `<option value="">— Selecciona —</option>` + docs.map(d=>`<option>${d}</option>`).join('');
+  }
+
+  function calcEffective(t){
+    // usa min_efectivos si viene del backend; si no, calcula local
+    const base = minutes(t.hora_fin) - minutes(t.hora_inicio);
+    if(t.min_efectivos!=null) return t.min_efectivos;
+    if(t.descanso && t.descanso.inicio && t.descanso.fin){
+      return base - (minutes(t.descanso.fin) - minutes(t.descanso.inicio));
+    }
+    return base;
+  }
+
+  function renderDay(){
+    const { capacities, generated_at, turnos } = state.data;
+    const cap = capacities[state.sucursal] || 0;
+    $('#capInfo').textContent = `Capacidad ${state.sucursal}: ${cap}`;
+    $('#genAt').textContent = generated_at ? `Última publicación: ${new Date(generated_at).toLocaleString()}` : '';
+
+    const list = turnos.filter(t=> t.sucursal===state.sucursal && t.dia===state.dia)
+                       .sort((a,b)=> a.profesional.localeCompare(b.profesional));
+
+    // Tabla detalle
+    const tbody = $('#tbl tbody');
+    tbody.innerHTML = list.map(t=>{
+      const dur = calcEffective(t);
+      return `<tr><td>${t.profesional}</td><td>${t.dia}</td><td>${t.hora_inicio}</td><td>${t.hora_fin}</td><td><span class=\"pill\">${fmtDur(dur)}</span></td></tr>`;
+    }).join('');
+
+    // Pico de concurrencia
+    const slotList = slots();
+    const map = new Map(slotList.map(s=>[s,0]));
+    list.forEach(t=>{ const s=minutes(t.hora_inicio), e=minutes(t.hora_fin); slotList.forEach(x=>{const mm=minutes(x); if(mm>=s && mm<e) map.set(x,(map.get(x)||0)+1);}); });
+    const peak = Math.max(...Array.from(map.values()));
+    $('#peakInfo').textContent = `Pico: ${peak}/${cap}`;
+
+    // Gantt por profesional
+    const names = list.map(x=>x.profesional);
+    $('#nameCol').innerHTML = names.map(n=>`<div class="muted">${n}</div>`).join('');
+    $('#durCol').innerHTML = list.map(t=>`<div class="dur">${fmtDur(calcEffective(t))}</div>`).join('');
+
+    const base = START_H*60, total = (END_H-START_H)*60;
+    const tracksHtml = list.map(t=>{
+      const left = ((minutes(t.hora_inicio)-base)/total)*100;
+      const width = ((minutes(t.hora_fin)-minutes(t.hora_inicio))/total)*100;
+      const rest = t.descanso && t.descanso.inicio && t.descanso.fin;
+      const restLeft = rest ? ((minutes(t.descanso.inicio)-base)/total)*100 : 0;
+      const restWidth = rest ? ((minutes(t.descanso.fin)-minutes(t.descanso.inicio))/total)*100 : 0;
+      const tip = rest ? `${t.hora_inicio}–${t.hora_fin} · descanso ${t.descanso.inicio}–${t.descanso.fin} · ${fmtDur(calcEffective(t))}` : `${t.hora_inicio}–${t.hora_fin} · ${fmtDur(calcEffective(t))}`;
+      return `<div class="track">
+        <div class="bar" style="left:${left}%; width:${width}%" title="${tip}">${t.profesional} · ${t.hora_inicio}–${t.hora_fin}</div>
+        ${ rest ? `<div class="rest" style="left:${restLeft}%; width:${restWidth}%" title="Descanso"></div>` : '' }
+      </div>`;
+    }).join('');
+    $('#tracks').innerHTML = tracksHtml || '<div class="muted">Sin turnos para esta combinación.</div>';
+  }
+
+  function renderWeekBySucursal(){
+    const cap = state.data.capacities[state.sucursal] || 0;
+    const byDoc = {};
+    (state.data.turnos||[]).filter(t=>t.sucursal===state.sucursal).forEach(t=>{ (byDoc[t.profesional]=byDoc[t.profesional]||[]).push(t); });
+    const docs = Object.keys(byDoc).sort();
+    const th = `<tr><th>Profesional</th>${DIA_ORDEN.map(d=>`<th>${d}</th>`).join('')}<th>Total</th></tr>`;
+    const rows = docs.map(name=>{
+      let total=0;
+      const tds = DIA_ORDEN.map(d=>{
+        const xs = (byDoc[name]||[]).filter(t=>t.dia===d).sort((a,b)=>minutes(a.hora_inicio)-minutes(b.hora_inicio));
+        const segs = xs.map(t=>{
+          const left = ((minutes(t.hora_inicio)-START_H*60)/((END_H-START_H)*60))*100;
+          const width = ((minutes(t.hora_fin)-minutes(t.hora_inicio))/((END_H-START_H)*60))*100;
+          const rest = t.descanso && t.descanso.inicio && t.descanso.fin;
+          const rl = rest? ((minutes(t.descanso.inicio)-START_H*60)/((END_H-START_H)*60))*100:0;
+          const rw = rest? ((minutes(t.descanso.fin)-minutes(t.descanso.inicio))/((END_H-START_H)*60))*100:0;
+          total += calcEffective(t);
+          return `<div class="wb"><div class="segm" style="left:${left}%; width:${width}%"></div>${rest?`<div class="segm rest" style="left:${rl}%; width:${rw}%"></div>`:''}</div>`;
+        }).join('');
+        return `<td>${segs||''}</td>`;
+      }).join('');
+      return `<tr><td>${name}</td>${tds}<td><span class="pill">${fmtDur(total)}</span></td></tr>`;
+    }).join('');
+    $('#weekBySuc').innerHTML = `<h3 style="margin:8px 0">Semana · ${state.sucursal} (capacidad ${cap})</h3><table>${th}${rows}</table>`;
+    $('#weekByDoc').style.display='none';
+    $('#weekBySuc').style.display='block';
+  }
+
+  function renderWeekByDoctor(){
+    if(!state.doctor){ $('#weekByDoc').innerHTML = '<div class="muted">Selecciona un doctor.</div>'; return; }
+    const items = (state.data.turnos||[]).filter(t=>t.profesional===state.doctor);
+    const capProv = state.data.capacities['Providencia']||0;
+    const capLC = state.data.capacities['Las Condes']||0;
+    const head = `<div></div>${DIA_ORDEN.map(d=>`<div class="muted" style="text-align:center">${d}</div>`).join('')}<div style="text-align:right" class="muted">Total</div>`;
+    let total=0;
+    const cells = DIA_ORDEN.map(d=>{
+      const perDay = items.filter(x=>x.dia===d);
+      const cell = `<div class="daycell">${perDay.map(t=>{
+        const left = ((minutes(t.hora_inicio)-START_H*60)/((END_H-START_H)*60))*100;
+        const width = ((minutes(t.hora_fin)-minutes(t.hora_inicio))/((END_H-START_H)*60))*100;
+        total += calcEffective(t);
+        const cls = (t.sucursal==='Providencia')? 'prov':'lc';
+        return `<div class="mini ${cls}" style="left:${left}%; width:${width}%"></div>`;
+      }).join('')}</div>`;
+      return cell;
+    }).join('');
+    const row = `<div class="muted">${state.doctor}</div>${cells}<div style="text-align:right"><span class="pill">${fmtDur(total)}</span></div>`;
+    $('#weekByDoc').innerHTML = `<h3 style="margin:8px 0">Semana · ${state.doctor} <span class="tag" style="margin-left:6px">Prov=<span style="color:var(--prov)">■</span> LC=<span style="color:var(--lc)">■</span></span></h3><div class="weekdoc">${head}${row}</div>`;
+    $('#weekBySuc').style.display='none';
+    $('#weekByDoc').style.display='block';
   }
 
   function render(){
     if(!state.data) return;
-    const { capacities, generated_at, turnos } = state.data;
-    $('#capInfo').textContent = `Capacidad ${state.sucursal}: ${capacities[state.sucursal] ?? '–'}`;
-    $('#genAt').textContent = generated_at ? `Última publicación: ${new Date(generated_at).toLocaleString()}` : '';
-
-    const dayTurns = turnos.filter(t=> t.sucursal===state.sucursal && t.dia===state.dia);
-
-    // ==== Tabla detalle ====
-    const tbody = $('#tbl tbody');
-    tbody.innerHTML = dayTurns.map(t=>{
-      const dur = minutes(t.hora_fin) - minutes(t.hora_inicio);
-      return `<tr><td>${t.profesional}</td><td>${t.dia}</td><td>${t.hora_inicio}</td><td>${t.hora_fin}</td><td><span class="pill">${fmtDur(dur)}</span></td></tr>`;
-    }).join('');
-
-    // ==== Concurrency chart ====
-    const cols = ((END_H-START_H)*60)/STEP_MIN;
-    $('#occCols').style.setProperty('--cols', cols);
-    const cap = capacities[state.sucursal] || 0;
-    const slotList = slots();
-    const map = new Map(slotList.map(s=>[s,0]));
-    dayTurns.forEach(t=>{
-      const start = minutes(t.hora_inicio); const end = minutes(t.hora_fin);
-      slotList.forEach(s=>{ const mm=minutes(s); if(mm>=start && mm<end){ map.set(s, (map.get(s)||0)+1 ); } });
-    });
-    let peak = 0, overBlocks = 0;
-    const bars = slotList.map(s=>{
-      const v = map.get(s)||0; peak = Math.max(peak, v); if(v>cap) overBlocks++;
-      const ratio = cap? Math.min(v/cap,1): 0; // altura relativa
-      let cls = 'low'; if(ratio>0.66) cls='ok'; else if(ratio>0.33) cls='mid';
-      if(v>cap) cls='over';
-      return `<div class="col ${cls}" style="height:${Math.max(6, Math.round(ratio*100))}px" title="${s} · ${v}/${cap}"></div>`;
-    }).join('');
-    $('#occCols').innerHTML = bars;
-    $('#peaks').textContent = `Pico: ${peak}/${cap} · Bloques sobre capacidad: ${overBlocks}`;
-
-    // ==== Gantt por profesional ====
-    const byProf = {};
-    dayTurns.forEach(t=>{ (byProf[t.profesional]=byProf[t.profesional]||[]).push(t); });
-    const names = Object.keys(byProf).sort();
-    $('#nameCol').innerHTML = names.map(n=>`<div class="muted">${n}</div>`).join('');
-    const base = START_H*60, total = (END_H-START_H)*60;
-    const tracksHtml = names.map(n=>{
-      const items = byProf[n].sort((a,b)=> minutes(a.hora_inicio)-minutes(b.hora_inicio)).map(t=>{
-        const left = ((minutes(t.hora_inicio)-base)/total)*100;
-        const width = ((minutes(t.hora_fin)-minutes(t.hora_inicio))/total)*100;
-        return `<div class="slotbar" style="left:${left}%; width:${width}%;">${t.hora_inicio}–${t.hora_fin}</div>`;
-      }).join('');
-      return `<div class="track">${items}</div>`;
-    }).join('');
-    $('#tracks').innerHTML = tracksHtml || '<div class="muted">Sin turnos para esta combinación.</div>';
+    if(state.mode==='day'){
+      $('#viewDay').style.display='block';
+      $('#viewWeek').style.display='none';
+      renderDay();
+    } else {
+      $('#viewDay').style.display='none';
+      $('#viewWeek').style.display='block';
+      if(state.weekMode==='sucursal') renderWeekBySucursal(); else renderWeekByDoctor();
+    }
   }
 
   async function fetchData(url){
@@ -208,17 +293,19 @@
     }catch(err){ $('#status').textContent = 'Error al cargar: ' + err.message; console.error(err); }
   }
 
-  // Eventos
-  $('#apply').addEventListener('click',()=>{
-    const url = $('#endpoint').value.trim();
-    state.dia = $('#selDia').value;
-    state.sucursal = $('#selSucursal').value;
-    if(url) localStorage.setItem('avaria_endpoint', url);
-    if(url) fetchData(url); else render();
-  });
-  $('#reload').addEventListener('click',()=>{ const url = $('#endpoint').value.trim(); if(url) fetchData(url); });
+  // Eventos UI
+  $('#modeDay').addEventListener('click',()=>{ state.mode='day'; $('#modeDay').classList.add('active'); $('#modeWeek').classList.remove('active'); render(); });
+  $('#modeWeek').addEventListener('click',()=>{ state.mode='week'; $('#modeWeek').classList.add('active'); $('#modeDay').classList.remove('active'); render(); });
   $('#selDia').addEventListener('change',()=>{ state.dia = $('#selDia').value; render(); });
-  $('#selSucursal').addEventListener('change',()=>{ state.sucursal = $('#selSucursal').value; render(); });
+  $('#selSucursal').addEventListener('change',()=>{ state.sucursal = $('#selSucursal').value; if(state.mode==='week' && state.weekMode==='sucursal') render(); else render(); });
+  $('#selDoctor').addEventListener('change',()=>{ state.doctor = $('#selDoctor').value; state.weekMode='doctor'; render(); });
+
+  // Cambiar a modo sucursal cuando se cambia sucursal si no hay doctor seleccionado
+  $('#selSucursal').addEventListener('click',()=>{ if(state.mode==='week' && !state.doctor){ state.weekMode='sucursal'; }});
+
+  // Apply y reload
+  $('#apply')?.addEventListener('click',()=>{ const url=$('#endpoint').value.trim(); if(url){ localStorage.setItem('avaria_endpoint', url); fetchData(url);} render(); });
+  $('#reload').addEventListener('click',()=>{ const url = $('#endpoint').value.trim(); if(url) fetchData(url); });
 
   // Boot
   const saved = localStorage.getItem('avaria_endpoint') || DEFAULT_ENDPOINT;
