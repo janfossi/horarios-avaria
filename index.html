@@ -6,70 +6,70 @@
   <title>Clínica Avaria · Horarios</title>
   <style>
     :root{
-      --bg:#0b0f14; --card:#121821; --muted:#7f8ea3; --text:#e6edf7; --accent:#2dd4bf; --danger:#ef4444; --ok:#22c55e;
-      --prov:#0ea5e9; --lc:#22c55e; /* colores sucursales */
+      --bg:#0b0f14; --card:#121821; --muted:#7f8ea3; --text:#e6edf7;
+      --line:#253145; --accent:#2dd4bf; --danger:#ef4444; --warn:#f59e0b;
+      --prov:#0ea5e9; --lc:#22c55e;
     }
     *{box-sizing:border-box}
-    body{margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji"; background:var(--bg); color:var(--text)}
-    header{display:flex; gap:12px; align-items:center; padding:20px 24px; border-bottom:1px solid #1f2937}
-    header h1{font-size:18px; font-weight:700; margin:0}
-    .container{max-width:1400px; margin:0 auto; padding:24px}
-    .card{background:var(--card); border:1px solid #1f2937; border-radius:16px; padding:18px; box-shadow:0 8px 24px rgba(0,0,0,.25)}
-    .grid{display:grid; gap:16px}
-    @media (min-width: 1240px){ .grid{grid-template-columns: 1.2fr .8fr} }
+    body{margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial; background:var(--bg); color:var(--text)}
+    header{display:flex; gap:12px; align-items:center; padding:16px 20px; border-bottom:1px solid var(--line)}
+    header h1{font-size:18px; margin:0; font-weight:700}
+    .wrap{max-width:1400px; margin:0 auto; padding:20px}
+    .controls{display:grid; grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr 1fr; gap:10px; margin-bottom:12px}
     label{font-size:12px; color:var(--muted)}
-    select,input[type="text"]{width:100%; padding:10px 12px; border-radius:12px; border:1px solid #263244; background:#0e141d; color:var(--text)}
-    .controls{display:grid; grid-template-columns: 1.2fr .8fr 1fr 1fr 1fr; gap:12px; margin:8px 0 4px}
-    .muted{color:var(--muted)}
-    .tag{display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; background:#0d141c; border:1px solid #253145; font-size:12px}
-    .flex{display:flex; gap:10px; align-items:center}
-    .right{margin-left:auto}
-    .btn{padding:10px 14px; border-radius:12px; border:1px solid #283349; background:#0f1620; color:var(--text); cursor:pointer}
-    .btn:hover{filter:brightness(1.08)}
-    .seg{display:inline-flex; border:1px solid #283349; border-radius:12px; overflow:hidden}
-    .seg button{padding:8px 12px; background:#0f1620; color:var(--text); border:0; cursor:pointer}
+    select,input{width:100%; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:#0e141d; color:var(--text)}
+    .seg{display:inline-flex; border:1px solid var(--line); border-radius:10px; overflow:hidden}
+    .seg button{padding:10px 14px; background:#0f1620; color:var(--text); border:0; cursor:pointer}
     .seg button.active{background:#172233}
+    .card{background:#111721; border:1px solid var(--line); border-radius:14px; padding:16px; box-shadow:0 8px 24px rgba(0,0,0,.25)}
+    .kpis{display:flex; gap:10px; flex-wrap:wrap; margin:8px 0 14px}
+    .chip{display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:999px; border:1px solid var(--line); background:#0f1620; color:#c9d4e5; font-size:12px}
+    h3{margin:8px 0 8px}
 
-    /* ==== Concurrency (compact summary only) ==== */
-    .chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px}
+    /* Heatmap */
+    .heat{display:grid; grid-template-columns: 110px 1fr; gap:8px}
+    .heat .rows{display:flex; flex-direction:column; gap:6px}
+    .heat .row{display:grid; grid-template-columns: repeat(var(--cols), 1fr); gap:1px}
+    .heat .cell{height:18px; border-radius:3px}
+    .heat .lab{font-size:12px; color:var(--muted); text-align:right; padding-right:6px}
+    .axis{display:grid; grid-template-columns: 110px 1fr; gap:8px; margin-bottom:6px}
+    .ticks{display:grid; grid-template-columns: repeat(var(--cols), 1fr); font-size:11px; color:#94a3b8}
 
-    /* ==== Gantt Día ==== */
-    .gantt{display:grid; grid-template-columns: 210px 1fr 80px; gap:10px; margin-top:12px}
+    /* Bars daily */
+    .bars{display:grid; grid-template-columns: 180px 1fr 100px; gap:10px; align-items:center}
+    .barbg{height:16px; border:1px solid var(--line); border-radius:8px; background:#0c121b; position:relative}
+    .barfill{position:absolute; top:2px; bottom:2px; left:2px; border-radius:6px; background:linear-gradient(180deg,#0b3a4d,#0b2a3d)}
+
+    /* Gantt Día */
+    .gantt{display:grid; grid-template-columns: 210px 1fr 90px; gap:10px}
     .names{display:flex; flex-direction:column; gap:10px; font-size:13px}
     .tracks{display:flex; flex-direction:column; gap:10px}
-    .track{position:relative; width:100%; height:32px; border-radius:12px; border:1px solid #263244; background:#0c121b; overflow:hidden}
-    .bar{position:absolute; top:5px; bottom:5px; border-radius:8px; background:linear-gradient(180deg, #113148, #122033); box-shadow:0 2px 6px rgba(0,0,0,.3); color:#cde5ff; display:flex; align-items:center; padding:0 10px; gap:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+    .track{position:relative; height:32px; border:1px solid var(--line); border-radius:10px; background:#0c121b; overflow:hidden}
+    .slot{position:absolute; top:5px; bottom:5px; border-radius:8px; background:linear-gradient(180deg,#113148,#122033); display:flex; align-items:center; padding:0 10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
     .rest{position:absolute; top:7px; bottom:7px; border-radius:6px; background:rgba(239,68,68,.25); border:1px dashed rgba(239,68,68,.6)}
     .dur{display:flex; align-items:center; justify-content:flex-end; font-size:12px; color:#cbd5e1}
+    .axisDay{display:grid; grid-template-columns: 210px 1fr 90px; gap:10px; margin:6px 0}
+    .ticksDay{display:grid; grid-template-columns: repeat(var(--cols), 1fr); font-size:11px; color:#94a3b8}
 
-    /* ==== Semana por sucursal ==== */
-    .week{margin-top:12px}
-    .week table{width:100%; border-collapse:collapse; font-size:13px}
-    .week th,.week td{padding:10px 8px; border-bottom:1px solid #1f2937; vertical-align:middle}
-    .wb{position:relative; height:16px; border-radius:6px; background:#0c121b; border:1px solid #263244}
-    .wb .segm{position:absolute; top:2px; bottom:2px; border-radius:5px; background:linear-gradient(180deg,#0b3a4d,#0b2a3d)}
-    .wb .segm.rest{background:rgba(239,68,68,.25); border:1px dashed rgba(239,68,68,.6)}
-
-    /* ==== Semana por doctor (opción A) ==== */
-    .weekdoc{display:grid; grid-template-columns: 120px repeat(7, 1fr) 120px; gap:8px; align-items:center}
-    .daycell{height:20px; border-radius:6px; background:#0c121b; border:1px solid #263244; position:relative}
-    .mini{position:absolute; top:2px; bottom:2px; border-radius:5px}
+    /* Week Doctor */
+    .weekdoc{display:grid; grid-template-columns: 120px repeat(7,1fr) 110px; gap:8px; align-items:center}
+    .daycell{height:18px; border:1px solid var(--line); border-radius:6px; background:#0c121b; position:relative}
+    .mini{position:absolute; top:2px; bottom:2px; border-radius:5px; opacity:.95}
     .prov{background:var(--prov)}
     .lc{background:var(--lc)}
+    .legend{display:flex; gap:10px; align-items:center; font-size:12px; color:#b6c3d6}
+    .lg{display:inline-flex; align-items:center; gap:6px}
+    .sq{width:12px; height:12px; border-radius:3px; display:inline-block}
   </style>
 </head>
 <body>
   <header>
     <h1>Clínica Avaria · Horarios</h1>
-    <span class="tag">MVP</span>
-    <div class="right flex">
-      <span id="status" class="muted">Sin datos</span>
-      <button id="reload" class="btn">Actualizar</button>
-    </div>
+    <span class="chip" id="status">Sin datos</span>
   </header>
 
-  <div class="container grid">
-    <section class="card">
+  <div class="wrap">
+    <div class="card">
       <div class="controls">
         <div>
           <label>Endpoint JSON</label>
@@ -78,279 +78,271 @@
         <div>
           <label>Vista</label>
           <div class="seg">
-            <button id="modeDay" class="active">Día</button>
-            <button id="modeWeek">Semana</button>
+            <button id="vResumen" class="active">Resumen</button>
+            <button id="vSucursal">Sucursal</button>
+            <button id="vDoctor">Doctor</button>
           </div>
-        </div>
-        <div>
-          <label>Día</label>
-          <select id="selDia"></select>
         </div>
         <div>
           <label>Sucursal</label>
           <select id="selSucursal"></select>
         </div>
         <div>
-          <label>Doctor (solo vista semana)</label>
+          <label>Doctor</label>
           <select id="selDoctor"></select>
         </div>
-      </div>
-
-      <div class="flex chips">
-        <span id="capInfo" class="tag">Capacidad: –</span>
-        <span id="peakInfo" class="tag">Pico: –</span>
-        <span id="genAt" class="muted"></span>
-      </div>
-
-      <!-- CONTENEDORES DE VISTAS -->
-      <div id="viewDay">
-        <h3 style="margin:12px 0 8px">Turnos del día</h3>
-        <!-- Eje X superior -->
-        <div id="axisTop" style="display:grid; grid-template-columns:210px 1fr 80px; gap:10px; margin-bottom:6px">
-          <div></div>
-          <div id="axisTicks" style="display:grid; grid-template-columns: repeat(var(--cols), 1fr); gap:0 0; font-size:11px; color:#94a3b8;">
+        <div>
+          <label>Horario de operación</label>
+          <div class="seg">
+            <button data-range="8-21" class="r active">08–21</button>
+            <button data-range="9-20" class="r">09–20</button>
           </div>
-          <div></div>
         </div>
-        <div class="gantt">
-          <div class="names" id="nameCol"></div>
-          <div class="tracks" id="tracks"></div>
-          <div class="names" id="durCol"></div>
+        <div>
+          <label>&nbsp;</label>
+          <button id="reload" style="width:100%; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:#0f1620; color:var(--text); cursor:pointer">Actualizar</button>
         </div>
       </div>
 
-      <div id="viewWeek" style="display:none">
-        <div id="weekAll" class="week"></div>
-        <div id="weekBySuc" class="week"></div>
-        <div id="weekByDoc" class="week" style="display:none"></div>
+      <div class="kpis" id="kpis"></div>
+
+      <!-- ====== RESUMEN ====== -->
+      <div id="viewResumen">
+        <h3>Ocupación semanal (heatmap)</h3>
+        <div class="axis"><div></div><div class="ticks" id="hmTicks"></div></div>
+        <div class="heat">
+          <div class="rows" id="hmLabels"></div>
+          <div class="rows" id="hmRows"></div>
+        </div>
+        <h3 style="margin-top:16px">Horas usadas vs disponibles (por día)</h3>
+        <div id="barsDaily"></div>
+        <div style="margin-top:10px" class="legend">
+          <div class="lg"><span class="sq" style="background:#0b3a4d"></span> Usadas</div>
+          <div class="lg"><span class="sq" style="background:#334155"></span> Disponibles</div>
+          <div class="lg"><span class="sq" style="background:#4e1b1b"></span> Overcap</div>
+        </div>
       </div>
-    </section>
+
+      <!-- ====== SUCURSAL ====== -->
+      <div id="viewSucursal" style="display:none">
+        <div class="legend" style="margin-bottom:8px">
+          <div class="lg"><span class="sq" style="background:#113148"></span> Turno</div>
+          <div class="lg"><span class="sq" style="background:rgba(239,68,68,.6)"></span> Descanso</div>
+        </div>
+        <div class="axisDay"><div></div><div class="ticksDay" id="dayTicks"></div><div></div></div>
+        <div class="gantt">
+          <div class="names" id="scNames"></div>
+          <div class="tracks" id="scTracks"></div>
+          <div class="names" id="scDur"></div>
+        </div>
+      </div>
+
+      <!-- ====== DOCTOR ====== -->
+      <div id="viewDoctor" style="display:none">
+        <div class="legend" style="margin:6px 0 8px">
+          <div class="lg"><span class="sq" style="background:var(--prov)"></span> Providencia</div>
+          <div class="lg"><span class="sq" style="background:var(--lc)"></span> Las Condes</div>
+        </div>
+        <div id="wkDoc"></div>
+      </div>
+    </div>
   </div>
 
 <script>
   const DEFAULT_ENDPOINT = "https://script.google.com/macros/s/AKfycby1wmrAeXSYE7uXhkJY345RJo1EXfouFYqhK-3mcq5v9uWoLYVksQdicLX71SeL7J7JgA/exec";
+  let START_H = 8, END_H = 21; // configurable por UI
   const DIA_ORDEN = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
-  const START_H = 8, END_H = 21, STEP_MIN = 15;
 
   const $ = s => document.querySelector(s);
-  const $$ = s => Array.from(document.querySelectorAll(s));
-  const state = { data:null, dia:'Lunes', sucursal:'', mode:'day', weekMode:'sucursal', doctor:'' };
+  const state = { data:null, sucursal:'', doctor:'', view:'resumen' };
 
   function pad2(n){return String(n).padStart(2,'0')}
   function minutes(hhmm){ const [h,m]=hhmm.split(':').map(Number); return h*60+m; }
+  function slots(step){ const arr=[]; for(let h=START_H;h<END_H;h++){ for(let m=0;m<60;m+=step) arr.push(`${pad2(h)}:${pad2(m)}`);} return arr; }
   function fmtDur(min){ const h=Math.floor(min/60), m=min%60; return `${h}h ${pad2(m)}m`; }
-  function slots(){ const arr=[]; for(let h=START_H; h<END_H; h++) for(let m=0; m<60; m+=STEP_MIN) arr.push(`${pad2(h)}:${pad2(m)}`); return arr; }
-  const dayIdx = d => DIA_ORDEN.indexOf(d);
 
-  function loadUIChoices(data){
-    const suc = Object.keys(data.capacities || { 'Las Condes':4, 'Providencia':6 });
-    $('#selSucursal').innerHTML = `<option value="">— Todas —</option>` + suc.map(s=>`<option>${s}</option>`).join('');
-    $('#selDia').innerHTML = DIA_ORDEN.map(d=>`<option>${d}</option>`).join('');
-    const docs = [...new Set((data.turnos||[]).map(t=>t.profesional))].sort();
-    $('#selDoctor').innerHTML = `<option value="">— Ninguno —</option>` + docs.map(d=>`<option>${d}</option>`).join('');
-  });
-    $('#selSucursal').innerHTML = suc.map(s=>`<option>${s}</option>`).join('');
-    // días
-    $('#selDia').innerHTML = DIA_ORDEN.map(d=>`<option>${d}</option>`).join('');
-    // doctores
-    const docs = [...new Set((data.turnos||[]).map(t=>t.profesional))].sort();
-    $('#selDoctor').innerHTML = `<option value="">— Selecciona —</option>` + docs.map(d=>`<option>${d}</option>`).join('');
+  function loadChoices(){
+    const caps = state.data.capacities || {}; const suc = Object.keys(caps);
+    $('#selSucursal').innerHTML = `<option value="">Todas</option>` + suc.map(s=>`<option>${s}</option>`).join('');
+    const docs = [...new Set((state.data.turnos||[]).map(t=>t.profesional))].sort();
+    $('#selDoctor').innerHTML = `<option value="">Todos</option>` + docs.map(d=>`<option>${d}</option>`).join('');
   }
 
-  function calcEffective(t){
-    // usa min_efectivos si viene del backend; si no, calcula local
-    const base = minutes(t.hora_fin) - minutes(t.hora_inicio);
-    if(t.min_efectivos!=null) return t.min_efectivos;
-    if(t.descanso && t.descanso.inicio && t.descanso.fin){
-      return base - (minutes(t.descanso.fin) - minutes(t.descanso.inicio));
-    }
-    return base;
+  function compute(step){
+    const caps = state.data.capacities; const stepMin = state.data.block_minutes || step; const SLOTS = slots(stepMin);
+    const per = {}; // per[sucursal][dia][slot] = concurrencia
+    const perAll = {}; // perAll[dia][slot]
+
+    const sucList = Object.keys(caps);
+    sucList.forEach(s=>{ per[s] = {}; DIA_ORDEN.forEach(d=> per[s][d] = Object.fromEntries(SLOTS.map(x=>[x,0]))); });
+    DIA_ORDEN.forEach(d=> perAll[d] = Object.fromEntries(SLOTS.map(x=>[x,0])));
+
+    (state.data.turnos||[]).forEach(t=>{
+      const S = per[t.sucursal]; if(!S) return;
+      const start = minutes(t.hora_inicio), end = minutes(t.hora_fin);
+      SLOTS.forEach(s=>{ const mm=minutes(s); if(mm>=start && mm<end){ S[t.dia][s]++; perAll[t.dia][s]++; }});
+      if(t.descanso && t.descanso.inicio && t.descanso.fin){
+        const rs=minutes(t.descanso.inicio), rf=minutes(t.descanso.fin);
+        SLOTS.forEach(s=>{ const mm=minutes(s); if(mm>=rs && mm<rf){ S[t.dia][s] = Math.max(0,S[t.dia][s]-1); perAll[t.dia][s] = Math.max(0,perAll[t.dia][s]-1);} });
+      }
+    });
+    return { SLOTS, per, perAll };
   }
 
-  function renderDay(){
-    const { capacities, generated_at, turnos } = state.data;
-    const suc = state.sucursal || Object.keys(capacities)[0];
-    const cap = capacities[suc] || 0;
-    $('#capInfo').textContent = `Capacidad ${suc}: ${cap}`;
-    $('#genAt').textContent = generated_at ? `Última publicación: ${new Date(generated_at).toLocaleString()}` : '';
-
-    const list = turnos.filter(t=> (state.sucursal? t.sucursal===state.sucursal : true) && t.dia===state.dia)
-                       .sort((a,b)=> a.profesional.localeCompare(b.profesional));
-
-    const tbody = $('#tbl tbody'); if(tbody) tbody.innerHTML = '';
-
-    const slotList = slots();
-    $('#axisTicks').style.setProperty('--cols', slotList.length);
-    $('#axisTicks').innerHTML = slotList.map((s,i)=> i%4===0? `<div style='text-align:center'>${s}</div>`: `<div></div>`).join('');
-
-    const map = new Map(slotList.map(s=>[s,0]));
-    list.forEach(t=>{ const s=minutes(t.hora_inicio), e=minutes(t.hora_fin); slotList.forEach(x=>{const mm=minutes(x); if(mm>=s && mm<e) map.set(x,(map.get(x)||0)+1);}); });
-    const peak = Math.max(0,...Array.from(map.values()));
-    $('#peakInfo').textContent = `Pico: ${peak}/${cap}`;
-
-    const names = list.map(x=>x.profesional);
-    $('#nameCol').innerHTML = names.map(n=>`<div class="muted">${n}</div>`).join('');
-    $('#durCol').innerHTML = list.map(t=>`<div class="dur">${fmtDur(calcEffective(t))}</div>`).join('');
-
-    const base = START_H*60, total = (END_H-START_H)*60;
-    const tracksHtml = list.map(t=>{
-      const left = ((minutes(t.hora_inicio)-base)/total)*100;
-      const width = ((minutes(t.hora_fin)-minutes(t.hora_inicio))/total)*100;
-      const rest = t.descanso && t.descanso.inicio && t.descanso.fin;
-      const restLeft = rest ? ((minutes(t.descanso.inicio)-base)/total)*100 : 0;
-      const restWidth = rest ? ((minutes(t.descanso.fin)-minutes(t.descanso.inicio))/total)*100 : 0;
-      const tip = rest ? `${t.hora_inicio}–${t.hora_fin} · descanso ${t.descanso.inicio}–${t.descanso.fin} · ${fmtDur(calcEffective(t))}` : `${t.hora_inicio}–${t.hora_fin} · ${fmtDur(calcEffective(t))}`;
-      return `<div class="track">
-        <div class="bar" style="left:${left}%; width:${width}%" title="${tip}">${t.profesional} · ${t.hora_inicio}–${t.hora_fin}</div>
-        ${ rest ? `<div class="rest" style="left:${restLeft}%; width:${restWidth}%" title="Descanso"></div>` : '' }
-      </div>`;
-    }).join('');
-    $('#tracks').innerHTML = tracksHtml || '<div class="muted">Sin turnos para esta combinación.</div>';
-  }
-      </div>`;
-    }).join('');
-    $('#tracks').innerHTML = tracksHtml || '<div class="muted">Sin turnos para esta combinación.</div>';
+  function kpiRender(){
+    const caps = state.data.capacities; const { SLOTS, per } = compute(state.data.block_minutes||15);
+    const hoursPerDay = (END_H-START_H);
+    const cards=[];
+    Object.keys(caps).forEach(s=>{
+      let used=0, over=0; DIA_ORDEN.forEach(d=>{ SLOTS.forEach(x=>{ used += per[s][d][x]>0?1:0; if(per[s][d][x] > caps[s]) over++; }); });
+      const usedH = used*(state.data.block_minutes||15)/60;
+      const availH = hoursPerDay*caps[s]*7;
+      cards.push(`<span class="chip"><b>${s}</b> · Usadas ${usedH.toFixed(1)}h / Disponibles ${availH}h · Utilización ${(usedH/availH*100).toFixed(0)}%${over?` · <span style='color:var(--danger)'>Overcap ${over}</span>`:''}</span>`);
+    });
+    $('#kpis').innerHTML = cards.join('');
   }
 
-  function renderWeekBySucursal(){
-    const caps = state.data.capacities || {};
-    const renderTable = (sucursalLabel, sucFilter) => {
-      const byDoc = {};
-      (state.data.turnos||[]).filter(t=> sucFilter? t.sucursal===sucFilter : true).forEach(t=>{ (byDoc[t.profesional]=byDoc[t.profesional]||[]).push(t); });
-      const docs = Object.keys(byDoc).sort();
-      const th = `<tr><th>Profesional</th>${DIA_ORDEN.map(d=>`<th>${d}</th>`).join('')}<th>Total</th></tr>`;
-      const rows = docs.map(name=>{
-        let total=0;
-        const tds = DIA_ORDEN.map(d=>{
-          const xs = (byDoc[name]||[]).filter(t=>t.dia===d).sort((a,b)=>minutes(a.hora_inicio)-minutes(b.hora_inicio));
-          const segs = xs.map(t=>{
-            const left = ((minutes(t.hora_inicio)-START_H*60)/((END_H-START_H)*60))*100;
-            const width = ((minutes(t.hora_fin)-minutes(t.hora_inicio))/((END_H-START_H)*60))*100;
-            const rest = t.descanso && t.descanso.inicio && t.descanso.fin;
-            const rl = rest? ((minutes(t.descanso.inicio)-START_H*60)/((END_H-START_H)*60))*100:0;
-            const rw = rest? ((minutes(t.descanso.fin)-minutes(t.descanso.inicio))/((END_H-START_H)*60))*100:0;
-            total += calcEffective(t);
-            const tag = sucFilter ? '' : `<span class='tag' style='margin-left:6px'>${t.sucursal}</span>`;
-            return `<div class="wb" title="${t.hora_inicio}–${t.hora_fin}">${tag}<div class="segm" style="left:${left}%; width:${width}%"></div>${rest?`<div class="segm rest" style="left:${rl}%; width:${rw}%"></div>`:''}</div>`;
-          }).join('');
-          return `<td>${segs||''}</td>`;
-        }).join('');
-        return `<tr><td>${name}</td>${tds}<td><span class="pill">${fmtDur(total)}</span></td></tr>`;
+  // ===== Resumen (heatmap + barras) =====
+  function renderResumen(){
+    const step = state.data.block_minutes||15; const { SLOTS, per, perAll } = compute(step);
+    const targetSuc = state.sucursal; // ''=todas
+    const caps = state.data.capacities; const cols = Math.ceil((END_H-START_H)*60/60); // ticks cada 60min
+    document.documentElement.style.setProperty('--cols', Math.ceil((END_H-START_H)*60/step));
+
+    // Ticks
+    const ticksHour = []; for(let h=START_H; h<END_H; h++) ticksHour.push(`${pad2(h)}:00`);
+    $('#hmTicks').style.setProperty('--cols', ticksHour.length);
+    $('#hmTicks').innerHTML = ticksHour.map(t=>`<div style="text-align:center">${t}</div>`).join('');
+
+    // Labels y filas
+    const scope = targetSuc ? [targetSuc] : Object.keys(caps);
+    $('#hmLabels').innerHTML = scope.map(s=>`<div class="lab">${s}</div>`).concat(['<div class="lab">Total</div>']).join('');
+
+    const rowsHtml = scope.map(s=>{
+      const cells = DIA_ORDEN.map(d=>{
+        return `<div class="row" style="--cols:${SLOTS.length}">`+
+          SLOTS.map((x)=>{
+            const v = per[s][d][x]; const pct = caps[s]? v/caps[s] : 0;
+            const c = v>caps[s] ? 'rgba(239,68,68,.7)' : `rgba(45,212,191,${Math.max(.08, pct)})`;
+            return `<div class="cell" title="${d} ${x} · ${v}/${caps[s]}" style="background:${c}"></div>`;
+          }).join('')+`</div>`;
       }).join('');
-      return `<h3 style="margin:8px 0">Semana ${sucursalLabel? '· '+sucursalLabel : ''}</h3><table>${th}${rows}</table>`;
-    };
+      return cells;
+    }).join('');
 
-    const suc = state.sucursal; // '' = todas
-    if(!suc){
-      $('#weekAll').innerHTML = renderTable('', null);
-      $('#weekBySuc').innerHTML = '';
-    } else {
-      $('#weekAll').innerHTML = '';
-      $('#weekBySuc').innerHTML = renderTable(suc, suc);
-    }
-    $('#weekByDoc').style.display='none';
-    $('#weekAll').style.display='block';
-    $('#weekBySuc').style.display='block';
+    // Total (todas sucursales)
+    const totalRow = DIA_ORDEN.map(d=>{
+      return `<div class="row" style="--cols:${SLOTS.length}">`+
+        SLOTS.map((x)=>{
+          const v = perAll[d][x]; const capTot = scope.reduce((a,s)=> a + (caps[s]||0), 0);
+          const c = v>capTot ? 'rgba(239,68,68,.7)' : `rgba(148,163,184,${Math.max(.08, v/(capTot||1))})`;
+          return `<div class="cell" title="${d} ${x} · ${v}/${capTot}" style="background:${c}"></div>`;
+        }).join('')+`</div>`;
+    }).join('');
+
+    $('#hmRows').innerHTML = rowsHtml + totalRow;
+
+    // Barras diarias
+    const bars = [];
+    DIA_ORDEN.forEach(d=>{
+      let used=0, capTot=0; if(targetSuc){ capTot = (END_H-START_H)*caps[targetSuc];
+        Object.keys(per[targetSuc][d]).forEach(x=>{ if(per[targetSuc][d][x]>0) used++; });
+      } else { capTot = (END_H-START_H)*scope.reduce((a,s)=>a+caps[s],0);
+        const acc = {}; SLOTS.forEach(x=>{ acc[x]=0; scope.forEach(s=> acc[x]+=per[s][d][x]); if(acc[x]>0) used++; });
+      }
+      const usedH = used*step/60; const availH = capTot; const pct = availH? usedH/availH:0;
+      bars.push(`<div class="bars"><div class="lab">${d}</div><div class="barbg"><div class="barfill" style="width:${pct*100}%"></div></div><div style="text-align:right">${usedH.toFixed(1)} / ${availH}h</div></div>`);
+    });
+    $('#barsDaily').innerHTML = bars.join('');
+
+    kpiRender();
   }
 
-  function renderWeekByDoctor(){
-    if(!state.doctor){ $('#weekByDoc').innerHTML = '<div class="muted">Selecciona un doctor o deja vacío para ver todos por sucursal.</div>'; return; }
-    const items = (state.data.turnos||[]).filter(t=>t.profesional===state.doctor);
-    let total=0;
-    const head = `<div></div>${DIA_ORDEN.map(d=>`<div class="muted" style="text-align:center">${d}</div>`).join('')}<div style="text-align:right" class="muted">Total</div>`;
-    const cells = DIA_ORDEN.map(d=>{
-      const perDay = items.filter(x=>x.dia===d);
-      const cell = `<div class="daycell">${perDay.map(t=>{
-        const left = ((minutes(t.hora_inicio)-START_H*60)/((END_H-START_H)*60))*100;
-        const width = ((minutes(t.hora_fin)-minutes(t.hora_inicio))/((END_H-START_H)*60))*100;
-        total += calcEffective(t);
-        const cls = (t.sucursal==='Providencia')? 'prov':'lc';
-        return `<div class="mini ${cls}" style="left:${left}%; width:${width}%" title="${t.sucursal}: ${t.hora_inicio}–${t.hora_fin}"></div>`;
-      }).join('')}</div>`;
-      return cell;
+  // ===== Sucursal (día → Gantt) =====
+  function renderSucursal(){
+    const caps = state.data.capacities; const suc = state.sucursal || Object.keys(caps)[0];
+    const list = (state.data.turnos||[]).filter(t=>t.sucursal===suc).sort((a,b)=> a.profesional.localeCompare(b.profesional));
+    // ticks
+    const step = state.data.block_minutes||15; const SLOTS = slots(step);
+    $('#dayTicks').style.setProperty('--cols', SLOTS.length);
+    $('#dayTicks').innerHTML = SLOTS.map((s,i)=> i%4===0? `<div style='text-align:center'>${s}</div>`: '<div></div>').join('');
+
+    // rows
+    const names = [...new Set(list.map(t=>t.profesional))];
+    $('#scNames').innerHTML = names.map(n=>`<div class="lab" style="text-align:right">${n}</div>`).join('');
+    const base=START_H*60, total=(END_H-START_H)*60;
+    const trackHtml = names.map(n=>{
+      const turns = list.filter(x=>x.profesional===n).sort((a,b)=> minutes(a.hora_inicio)-minutes(b.hora_inicio));
+      const durDay = turns.reduce((acc,t)=> acc + (t.min_efectivos!=null ? t.min_efectivos : (minutes(t.hora_fin)-minutes(t.hora_inicio) - (t.descanso? (minutes(t.descanso.fin)-minutes(t.descanso.inicio)):0))), 0);
+      const slots = turns.map(t=>{
+        const left = ((minutes(t.hora_inicio)-base)/total)*100; const width = ((minutes(t.hora_fin)-minutes(t.hora_inicio))/total)*100;
+        const hasRest = t.descanso && t.descanso.inicio && t.descanso.fin;
+        const rL = hasRest? ((minutes(t.descanso.inicio)-base)/total)*100:0; const rW = hasRest? ((minutes(t.descanso.fin)-minutes(t.descanso.inicio))/total)*100:0;
+        const tip = `${t.hora_inicio}–${t.hora_fin}` + (hasRest? ` · descanso ${t.descanso.inicio}–${t.descanso.fin}`:'');
+        return `<div class="slot" style="left:${left}%; width:${width}%" title="${tip}">${t.hora_inicio}–${t.hora_fin}</div>${hasRest?`<div class='rest' style='left:${rL}%; width:${rW}%'></div>`:''}`;
+      }).join('');
+      return `<div class="track">${slots}</div><div class="dur">${fmtDur(durDay)}</div>`;
     }).join('');
-    const row = `<div class="muted">${state.doctor}</div>${cells}<div style="text-align:right"><span class="pill">${fmtDur(total)}</span></div>`;
-    $('#weekByDoc').innerHTML = `<h3 style="margin:8px 0">Semana · ${state.doctor} <span class="tag" style="margin-left:6px">Prov=<span style="color:var(--prov)">■</span> LC=<span style="color:var(--lc)">■</span></span></h3><div class="weekdoc">${head}${row}</div>`;
-    $('#weekBySuc').style.display='none';
-    $('#weekAll').style.display='none';
-    $('#weekByDoc').style.display='block';
+    $('#scTracks').innerHTML = trackHtml || '<div class="lab">Sin turnos</div>';
   }
-    const items = (state.data.turnos||[]).filter(t=>t.profesional===state.doctor);
-    const capProv = state.data.capacities['Providencia']||0;
-    const capLC = state.data.capacities['Las Condes']||0;
-    const head = `<div></div>${DIA_ORDEN.map(d=>`<div class="muted" style="text-align:center">${d}</div>`).join('')}<div style="text-align:right" class="muted">Total</div>`;
-    let total=0;
-    const cells = DIA_ORDEN.map(d=>{
-      const perDay = items.filter(x=>x.dia===d);
-      const cell = `<div class="daycell">${perDay.map(t=>{
-        const left = ((minutes(t.hora_inicio)-START_H*60)/((END_H-START_H)*60))*100;
-        const width = ((minutes(t.hora_fin)-minutes(t.hora_inicio))/((END_H-START_H)*60))*100;
-        total += calcEffective(t);
-        const cls = (t.sucursal==='Providencia')? 'prov':'lc';
-        return `<div class="mini ${cls}" style="left:${left}%; width:${width}%"></div>`;
-      }).join('')}</div>`;
+
+  // ===== Doctor (semana) =====
+  function renderDoctor(){
+    const dname = state.doctor; if(!dname){ $('#wkDoc').innerHTML = '<div class="lab">Selecciona un doctor.</div>'; return; }
+    const items = (state.data.turnos||[]).filter(t=>t.profesional===dname);
+    let total=0; const head = `<div></div>${DIA_ORDEN.map(d=>`<div class='lab' style='text-align:center'>${d}</div>`).join('')}<div class='lab' style='text-align:right'>Total</div>`;
+    const step = state.data.block_minutes||15; const SLOTS = slots(step); const base=START_H*60, widthTot=(END_H-START_H)*60;
+    const row = DIA_ORDEN.map(d=>{
+      const per = items.filter(x=>x.dia===d);
+      const cell = `<div class='daycell'>${per.map(t=>{ const l=((minutes(t.hora_inicio)-base)/widthTot)*100; const w=((minutes(t.hora_fin)-minutes(t.hora_inicio))/widthTot)*100; total += (t.min_efectivos!=null?t.min_efectivos:(minutes(t.hora_fin)-minutes(t.hora_inicio) - (t.descanso? (minutes(t.descanso.fin)-minutes(t.descanso.inicio)):0))); const cls=(t.sucursal==='Providencia')?'prov':'lc'; return `<div class='mini ${cls}' style='left:${l}%; width:${w}%' title='${t.sucursal} · ${t.hora_inicio}–${t.hora_fin}'></div>`; }).join('')}</div>`;
       return cell;
     }).join('');
-    const row = `<div class="muted">${state.doctor}</div>${cells}<div style="text-align:right"><span class="pill">${fmtDur(total)}</span></div>`;
-    $('#weekByDoc').innerHTML = `<h3 style="margin:8px 0">Semana · ${state.doctor} <span class="tag" style="margin-left:6px">Prov=<span style="color:var(--prov)">■</span> LC=<span style="color:var(--lc)">■</span></span></h3><div class="weekdoc">${head}${row}</div>`;
-    $('#weekBySuc').style.display='none';
-    $('#weekByDoc').style.display='block';
+    $('#wkDoc').innerHTML = `<div class='weekdoc'>${head}<div class='lab'>${dname}</div>${row}<div style='text-align:right'><span class='chip'>${fmtDur(total)}</span></div></div>`;
   }
 
   function render(){
     if(!state.data) return;
-    // Estado de controles según modo
-    if(state.mode==='day'){
-      $('#selDia').disabled = false;
-      $('#selDoctor').disabled = true;
-      $('#selSucursal').disabled = false;
-      $('#viewDay').style.display='block';
-      $('#viewWeek').style.display='none';
-      renderDay();
-    } else {
-      $('#selDia').disabled = true;
-      // Si hay doctor seleccionado, inhabilita sucursal
-      const hasDoc = !!state.doctor;
-      $('#selDoctor').disabled = false;
-      $('#selSucursal').disabled = hasDoc;
-      $('#viewDay').style.display='none';
-      $('#viewWeek').style.display='block';
-      if(hasDoc) { renderWeekByDoctor(); } else { renderWeekBySucursal(); }
+    // Deshabilitación lógica
+    if(state.view==='resumen'){
+      $('#selSucursal').disabled = false; $('#selDoctor').disabled = false;
+      $('#viewResumen').style.display='block'; $('#viewSucursal').style.display='none'; $('#viewDoctor').style.display='none'; renderResumen();
+    } else if(state.view==='sucursal'){
+      $('#selDoctor').disabled = false; $('#selSucursal').disabled = false;
+      $('#viewResumen').style.display='none'; $('#viewSucursal').style.display='block'; $('#viewDoctor').style.display='none'; renderSucursal();
+    } else { // doctor
+      $('#selDoctor').disabled = false; $('#selSucursal').disabled = true;
+      $('#viewResumen').style.display='none'; $('#viewSucursal').style.display='none'; $('#viewDoctor').style.display='block'; renderDoctor();
     }
-  } else {
-      $('#viewDay').style.display='none';
-      $('#viewWeek').style.display='block';
-      if(state.weekMode==='sucursal') renderWeekBySucursal(); else renderWeekByDoctor();
-    }
+    kpiRender();
   }
 
   async function fetchData(url){
     try{
       $('#status').textContent = 'Cargando…';
-      const res = await fetch(url, { cache: 'no-store' });
-      if(!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      state.data = data;
-      $('#status').textContent = (data.status==='error')? `JSON con estado=error (${data.error_count})` : 'OK';
-      loadUIChoices(data);
+      const res = await fetch(url, { cache:'no-store' });
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      state.data = await res.json();
+      $('#status').textContent = 'OK';
+      loadChoices();
       render();
-    }catch(err){ $('#status').textContent = 'Error al cargar: ' + err.message; console.error(err); }
+    }catch(e){ $('#status').textContent = 'Error: '+e.message; console.error(e); }
   }
 
-  // Eventos UI
-  $('#modeDay').addEventListener('click',()=>{ state.mode='day'; state.doctor=''; $('#modeDay').classList.add('active'); $('#modeWeek').classList.remove('active'); render(); });
-  $('#modeWeek').addEventListener('click',()=>{ state.mode='week'; $('#modeWeek').classList.add('active'); $('#modeDay').classList.remove('active'); render(); });
-  $('#selDia').addEventListener('change',()=>{ state.dia = $('#selDia').value; render(); });
-  $('#selSucursal').addEventListener('change',()=>{ state.sucursal = $('#selSucursal').value; if(state.mode==='week' && !state.doctor) render(); else render(); });
-  $('#selDoctor').addEventListener('change',()=>{ state.doctor = $('#selDoctor').value; render(); });
-
-  $('#apply')?.addEventListener('click',()=>{ const url=$('#endpoint').value.trim(); if(url){ localStorage.setItem('avaria_endpoint', url); fetchData(url);} render(); });
-  $('#reload').addEventListener('click',()=>{ const url = $('#endpoint').value.trim(); if(url) fetchData(url); });
+  // Eventos
+  document.querySelectorAll('.seg .r').forEach(b=> b.addEventListener('click', (e)=>{
+    document.querySelectorAll('.seg .r').forEach(x=>x.classList.remove('active'));
+    e.currentTarget.classList.add('active');
+    const [a,bh] = e.currentTarget.dataset.range.split('-').map(Number); START_H=a; END_H=bh; render();
+  }));
+  $('#vResumen').addEventListener('click',()=>{ ['vResumen','vSucursal','vDoctor'].forEach(id=>$('#'+id).classList.remove('active')); $('#vResumen').classList.add('active'); state.view='resumen'; render(); });
+  $('#vSucursal').addEventListener('click',()=>{ ['vResumen','vSucursal','vDoctor'].forEach(id=>$('#'+id).classList.remove('active')); $('#vSucursal').classList.add('active'); state.view='sucursal'; render(); });
+  $('#vDoctor').addEventListener('click',()=>{ ['vResumen','vSucursal','vDoctor'].forEach(id=>$('#'+id).classList.remove('active')); $('#vDoctor').classList.add('active'); state.view='doctor'; render(); });
+  $('#selSucursal').addEventListener('change',()=>{ state.sucursal = $('#selSucursal').value; render(); });
+  $('#selDoctor').addEventListener('change',()=>{ state.doctor = $('#selDoctor').value; if(state.view!=='doctor' && state.doctor) { state.view='doctor'; ['vResumen','vSucursal','vDoctor'].forEach(id=>$('#'+id).classList.remove('active')); $('#vDoctor').classList.add('active'); } render(); });
+  $('#reload').addEventListener('click',()=>{ const url = $('#endpoint').value.trim(); if(url){ localStorage.setItem('avaria_endpoint', url); fetchData(url); } });
 
   // Boot
-  const saved = localStorage.getItem('avaria_endpoint') || DEFAULT_ENDPOINT;
-  $('#endpoint').value = saved; 
-  fetchData(saved);
+  const saved = localStorage.getItem('avaria_endpoint') || DEFAULT_ENDPOINT; $('#endpoint').value = saved; fetchData(saved);
 </script>
 </body>
 </html>
