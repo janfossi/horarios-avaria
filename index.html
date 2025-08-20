@@ -60,6 +60,17 @@
     .legend{display:flex; gap:10px; align-items:center; font-size:12px; color:#b6c3d6}
     .lg{display:inline-flex; align-items:center; gap:6px}
     .sq{width:12px; height:12px; border-radius:3px; display:inline-block}
+
+    /* Week all doctors table */
+    .wkTable{width:100%; border-collapse:separate; border-spacing:0 6px; font-size:13px}
+    .wkTable th,.wkTable td{padding:8px 10px; text-align:center}
+    .wkTable th:first-child,.wkTable td:first-child{text-align:left}
+    .wkRow{background:#0c121b; border:1px solid var(--line); border-radius:10px}
+    .wkBar{height:12px; background:#0b3a4d; border-radius:6px}
+    .wkCell{min-width:90px}
+    .wkFoot{background:#0e141d; border:1px solid var(--line)}
+    .lg{display:inline-flex; align-items:center; gap:6px}
+    .sq{width:12px; height:12px; border-radius:3px; display:inline-block}
   </style>
 </head>
 <body>
@@ -152,7 +163,6 @@
   const DEFAULT_ENDPOINT = "https://script.google.com/macros/s/AKfycby1wmrAeXSYE7uXhkJY345RJo1EXfouFYqhK-3mcq5v9uWoLYVksQdicLX71SeL7J7JgA/exec";
   let START_H = 8, END_H = 21; // configurable por UI
   const DIA_ORDEN = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
-  const saved = DEFAULT_ENDPOINT;
 
   const $ = s => document.querySelector(s);
   const state = { data:null, sucursal:'', doctor:'', view:'resumen' };
@@ -288,8 +298,73 @@
   }
 
   // ===== Doctor (semana) =====
+  function calcEffective(t){
+    if(t.min_efectivos!=null) return t.min_efectivos;
+    const base = minutes(t.hora_fin)-minutes(t.hora_inicio);
+    const rest = (t.descanso && t.descanso.inicio && t.descanso.fin)
+      ? (minutes(t.descanso.fin)-minutes(t.descanso.inicio)) : 0;
+    return Math.max(0, base - rest);
+  }
+
+  function renderDoctorAll(){
+    const items = state.data.turnos || [];
+    if(!items.length){ $('#wkDoc').innerHTML = '<div class="lab">Sin datos.</div>'; return; }
+    const docs = [...new Set(items.map(t=>t.profesional))].sort();
+    const dayTotals = new Array(7).fill(0);
+    const dayMax = (END_H-START_H)*60; // para escalar la barrita de la celda
+
+    const head = `
+      <table class="wkTable">
+        <thead>
+          <tr class="wkRow">
+            <th>Profesional</th>
+            ${DIA_ORDEN.map(d=>`<th class="wkCell">${d}</th>`).join('')}
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    const rows = docs.map(name=>{
+      let weekSum = 0;
+      const tds = DIA_ORDEN.map((d,di)=>{
+        const segs = items.filter(x=> x.profesional===name && x.dia===d);
+        const mins = segs.reduce((acc,t)=> acc + calcEffective(t), 0);
+        weekSum += mins; dayTotals[di]+=mins;
+        const w = Math.min(100, (mins/dayMax)*100);
+        return `<td class="wkCell" title="${name} · ${d} · ${fmtDur(mins)}"><div class="wkBar" style="width:${w}%"></div></td>`;
+      }).join('');
+      return `<tr class="wkRow"><td style="text-align:left">${name}</td>${tds}<td><b>${fmtDur(weekSum)}</b></td></tr>`;
+    }).join('');
+
+    const grand = dayTotals.reduce((a,b)=>a+b,0);
+    const foot = `
+        </tbody>
+        <tfoot>
+          <tr class="wkFoot">
+            <td style="text-align:left"><b>Totales</b></td>
+            ${dayTotals.map(m=>`<td><b>${fmtDur(m)}</b></td>`).join('')}
+            <td><b>${fmtDur(grand)}</b></td>
+          </tr>
+        </tfoot>
+      </table>
+    `;
+    $('#wkDoc').innerHTML = head + rows + foot;
+  }
+
   function renderDoctor(){
-    const dname = state.doctor; if(!dname){ $('#wkDoc').innerHTML = '<div class="lab">Selecciona un doctor.</div>'; return; }
+    const dname = state.doctor; 
+    if(!dname){ renderDoctorAll(); return; }
+    const items = (state.data.turnos||[]).filter(t=>t.profesional===dname);
+    let total=0; const head = `<div></div>${DIA_ORDEN.map(d=>`<div class='lab' style='text-align:center'>${d}</div>`).join('')}<div class='lab' style='text-align:right'>Total</div>`;
+    const base=START_H*60, widthTot=(END_H-START_H)*60;
+    const row = DIA_ORDEN.map(d=>{
+      const per = items.filter(x=>x.dia===d);
+      const cell = `<div class='daycell'>${per.map(t=>{ const l=((minutes(t.hora_inicio)-base)/widthTot)*100; const w=((minutes(t.hora_fin)-minutes(t.hora_inicio))/widthTot)*100; total += calcEffective(t); const cls=(t.sucursal==='Providencia')?'prov':'lc'; return `<div class='mini ${cls}' style='left:${l}%; width:${w}%' title='${t.sucursal} · ${t.hora_inicio}–${t.hora_fin}'></div>`; }).join('')}</div>`;
+      return cell;
+    }).join('');
+    $('#wkDoc').innerHTML = `<div class='weekdoc'>${head}<div class='lab'>${dname}</div>${row}<div style='text-align:right'><span class='chip'>${fmtDur(total)}</span></div></div>`;
+  }
     const items = (state.data.turnos||[]).filter(t=>t.profesional===dname);
     let total=0; const head = `<div></div>${DIA_ORDEN.map(d=>`<div class='lab' style='text-align:center'>${d}</div>`).join('')}<div class='lab' style='text-align:right'>Total</div>`;
     const step = state.data.block_minutes||15; const SLOTS = slots(step); const base=START_H*60, widthTot=(END_H-START_H)*60;
