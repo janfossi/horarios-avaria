@@ -82,7 +82,7 @@
   <div class="wrap">
     <div class="card">
       <div class="controls">
-        <div>
+        <div style="display:none">
           <label>Endpoint JSON</label>
           <input id="endpoint" type="text" placeholder="URL Web App (doGet)" />
         </div>
@@ -102,12 +102,10 @@
           <label>Doctor</label>
           <select id="selDoctor"></select>
         </div>
-        <div>
+        <div style="display:none">
           <label>Horario de operación</label>
-          <div class="seg">
-            <button data-range="8-21" class="r active">08–21</button>
-            <button data-range="9-20" class="r">09–20</button>
-          </div>
+          <div class="seg"></div>
+        </div>
         </div>
         <div>
           <label>&nbsp;</label>
@@ -161,7 +159,7 @@
 
 <script>
   const DEFAULT_ENDPOINT = "https://script.google.com/macros/s/AKfycby1wmrAeXSYE7uXhkJY345RJo1EXfouFYqhK-3mcq5v9uWoLYVksQdicLX71SeL7J7JgA/exec";
-  let START_H = 8, END_H = 21; // configurable por UI
+  let START_H = 9, END_H = 19; // configurable por UI
   const DIA_ORDEN = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
 
   const $ = s => document.querySelector(s);
@@ -355,26 +353,6 @@
   function renderDoctor(){
     const dname = state.doctor; 
     if(!dname){ renderDoctorAll(); return; }
-    const items = (state.data.turnos||[]).filter(t=>t.profesional===dname);
-    let total=0; const head = `<div></div>${DIA_ORDEN.map(d=>`<div class='lab' style='text-align:center'>${d}</div>`).join('')}<div class='lab' style='text-align:right'>Total</div>`;
-    const base=START_H*60, widthTot=(END_H-START_H)*60;
-    const row = DIA_ORDEN.map(d=>{
-      const per = items.filter(x=>x.dia===d);
-      const cell = `<div class='daycell'>${per.map(t=>{ const l=((minutes(t.hora_inicio)-base)/widthTot)*100; const w=((minutes(t.hora_fin)-minutes(t.hora_inicio))/widthTot)*100; total += calcEffective(t); const cls=(t.sucursal==='Providencia')?'prov':'lc'; return `<div class='mini ${cls}' style='left:${l}%; width:${w}%' title='${t.sucursal} · ${t.hora_inicio}–${t.hora_fin}'></div>`; }).join('')}</div>`;
-      return cell;
-    }).join('');
-    $('#wkDoc').innerHTML = `<div class='weekdoc'>${head}<div class='lab'>${dname}</div>${row}<div style='text-align:right'><span class='chip'>${fmtDur(total)}</span></div></div>`;
-  }
-    const items = (state.data.turnos||[]).filter(t=>t.profesional===dname);
-    let total=0; const head = `<div></div>${DIA_ORDEN.map(d=>`<div class='lab' style='text-align:center'>${d}</div>`).join('')}<div class='lab' style='text-align:right'>Total</div>`;
-    const step = state.data.block_minutes||15; const SLOTS = slots(step); const base=START_H*60, widthTot=(END_H-START_H)*60;
-    const row = DIA_ORDEN.map(d=>{
-      const per = items.filter(x=>x.dia===d);
-      const cell = `<div class='daycell'>${per.map(t=>{ const l=((minutes(t.hora_inicio)-base)/widthTot)*100; const w=((minutes(t.hora_fin)-minutes(t.hora_inicio))/widthTot)*100; total += (t.min_efectivos!=null?t.min_efectivos:(minutes(t.hora_fin)-minutes(t.hora_inicio) - (t.descanso? (minutes(t.descanso.fin)-minutes(t.descanso.inicio)):0))); const cls=(t.sucursal==='Providencia')?'prov':'lc'; return `<div class='mini ${cls}' style='left:${l}%; width:${w}%' title='${t.sucursal} · ${t.hora_inicio}–${t.hora_fin}'></div>`; }).join('')}</div>`;
-      return cell;
-    }).join('');
-    $('#wkDoc').innerHTML = `<div class='weekdoc'>${head}<div class='lab'>${dname}</div>${row}<div style='text-align:right'><span class='chip'>${fmtDur(total)}</span></div></div>`;
-  }
 
   function render(){
     if(!state.data) return;
@@ -405,8 +383,7 @@
   }
 
   // Eventos
-  document.querySelectorAll('.seg .r').forEach(b=> b.addEventListener('click', (e)=>{
-    document.querySelectorAll('.seg .r').forEach(x=>x.classList.remove('active'));
+  /* horario fijo 09–19: sin selector */
     e.currentTarget.classList.add('active');
     const [a,bh] = e.currentTarget.dataset.range.split('-').map(Number); START_H=a; END_H=bh; render();
   }));
@@ -415,10 +392,10 @@
   $('#vDoctor').addEventListener('click',()=>{ ['vResumen','vSucursal','vDoctor'].forEach(id=>$('#'+id).classList.remove('active')); $('#vDoctor').classList.add('active'); state.view='doctor'; render(); });
   $('#selSucursal').addEventListener('change',()=>{ state.sucursal = $('#selSucursal').value; render(); });
   $('#selDoctor').addEventListener('change',()=>{ state.doctor = $('#selDoctor').value; if(state.view!=='doctor' && state.doctor) { state.view='doctor'; ['vResumen','vSucursal','vDoctor'].forEach(id=>$('#'+id).classList.remove('active')); $('#vDoctor').classList.add('active'); } render(); });
-  $('#reload').addEventListener('click',()=>{ const url = $('#endpoint').value.trim(); if(url){ localStorage.setItem('avaria_endpoint', url); fetchData(url); } });
+  $('#reload').addEventListener('click', ()=>{ fetchData(DEFAULT_ENDPOINT); });
 
   // Boot
-  const saved = localStorage.getItem('avaria_endpoint') || DEFAULT_ENDPOINT; $('#endpoint').value = saved; fetchData(saved);
+  fetchData(DEFAULT_ENDPOINT);
 </script>
 </body>
 </html>
